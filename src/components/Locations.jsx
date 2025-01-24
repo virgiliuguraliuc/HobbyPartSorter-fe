@@ -1,70 +1,213 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Table,
+  Modal,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
+import ConfirmationModal from "./ConfirmationModal";
 
 const Locations = () => {
-    const [locations, setLocations] = useState([]);
-    const [loading, setLoading] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState(null);
+  const [modalData, setModalData] = useState({
+    locationID: null,
+    locationName: "",
+    locationType: "",
+    address: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
 
-    // Fetch locations from the API
-    const fetchLocations = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch("http://localhost:5000/api/Items/GetLocations");
-            if (!response.ok) throw new Error("Failed to fetch locations");
-            const data = await response.json();
-            setLocations(data);
-        } catch (error) {
-            console.error("Error fetching locations:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchLocations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/Items/GetLocations"
+      );
+      if (!response.ok) throw new Error("Failed to fetch locations");
+      const data = await response.json();
+      setLocations(data);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
+  const handleSave = async () => {
+    const url = isEditing
+      ? "http://localhost:5000/api/Items/UpdateLocation"
+      : "http://localhost:5000/api/Items/AddLocation";
+    const method = isEditing ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(modalData),
+      });
+
+      if (response.ok) {
         fetchLocations();
-    }, []);
+        setShowModal(false);
+      } else {
+        console.error("Failed to save location");
+      }
+    } catch (error) {
+      console.error("Error saving location:", error);
+    }
+  };
 
-    return (
-        <div className="container mt-4">
-            <Card>
-                <Card.Header as="h2" className="text-center">
-                    Locations
-                </Card.Header>
-                <Card.Body>
-                    <Button
-                        variant="primary"
-                        className="mb-3"
-                        onClick={fetchLocations}
-                        disabled={loading}
-                    >
-                        {loading ? "Refreshing..." : "Refresh Locations"}
-                    </Button>
-                    <div className="table-responsive">
-                        <Table bordered>
-                            <thead className="thead-dark">
-                                <tr>
-                                    <th>Location ID</th>
-                                    <th>Location Name</th>
-                                    <th>Location Type</th>
-                                    <th>Address</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {locations.map((location) => (
-                                    <tr key={location.locationID}>
-                                        <td>{location.locationID}</td>
-                                        <td>{location.locationName}</td>
-                                        <td>{location.locationType || "N/A"}</td>
-                                        <td>{location.address || "N/A"}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/Items/DeleteLocation/${selectedForDelete.locationID}`,
+        { method: "DELETE" }
+      );
+
+      if (response.ok) {
+        fetchLocations();
+      } else {
+        console.error("Failed to delete location");
+      }
+    } catch (error) {
+      console.error("Error deleting location:", error);
+    } finally {
+      setShowDeleteModal(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+
+  return (
+    <div className="container mt-4">
+      <Card>
+        <Card.Header as="h2" className="d-flex justify-content-between align-items-center">
+          <span>Locations</span>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setModalData({ locationID: null, locationName: "", locationType: "", address: "" });
+              setIsEditing(false);
+              setShowModal(true);
+            }}
+          >
+            Add Location
+          </Button>
+        </Card.Header>
+        <Card.Body>
+          <Table bordered>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Address</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {locations.map((location) => (
+                <tr key={location.locationID}>
+                  <td>{location.locationName}</td>
+                  <td>{location.locationType || "N/A"}</td>
+                  <td>{location.address || "N/A"}</td>
+                  <td className="text-end">
+                    <div className="d-flex justify-content-end gap-2">
+                      <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => {
+                            setModalData(location);
+                            setIsEditing(true);
+                            setShowModal(true);
+                          }}
+                        >
+                          <i className="fas fa-pencil-alt"></i>
+                        </Button>
+                      </OverlayTrigger>
+                      <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedForDelete(location);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </OverlayTrigger>
                     </div>
-                </Card.Body>
-            </Card>
-        </div>
-    );
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+
+      {/* Add/Edit Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{isEditing ? "Edit Location" : "Add Location"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Location Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={modalData.locationName}
+                onChange={(e) => setModalData({ ...modalData, locationName: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Location Type</Form.Label>
+              <Form.Control
+                type="text"
+                value={modalData.locationType}
+                onChange={(e) => setModalData({ ...modalData, locationType: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Address</Form.Label>
+              <Form.Control
+                type="text"
+                value={modalData.address}
+                onChange={(e) => setModalData({ ...modalData, address: e.target.value })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSave}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${selectedForDelete?.locationName}"?`}
+      />
+    </div>
+  );
 };
 
 export default Locations;

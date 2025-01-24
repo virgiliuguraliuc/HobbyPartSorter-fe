@@ -4,8 +4,11 @@ import ProjectItems from "./ProjectItems";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
-  const [availableItems, setAvailableItems] = useState([]);
+  const [availableItems, setAvailableItems] = useState([]); // Ensure it's initialized as an empty array
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedContainer, setSelectedContainer] = useState(null);
+  
   const [modalData, setModalData] = useState({
     projectID: null,
     projectName: "",
@@ -19,9 +22,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/ProjectsBlob/GetProjects"
-      );
+      const response = await fetch("http://localhost:5000/api/ProjectsBlob/GetProjects");
       const data = await response.json();
       setProjects(data);
     } catch (error) {
@@ -34,11 +35,9 @@ const Projects = () => {
   // Fetch available items for Project Items dropdown
   const fetchAvailableItems = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/ItemsBlob/GetItems"
-      );
+      const response = await fetch("http://localhost:5000/api/ItemsBlob/GetItems");
       const data = await response.json();
-      setAvailableItems(data);
+      setAvailableItems(data || []); // Ensure data is an array
     } catch (error) {
       console.error("Error loading items:", error);
     }
@@ -99,23 +98,17 @@ const Projects = () => {
   const handleSave = async () => {
     const formData = new FormData();
 
-    // Only include projectID if updating an existing project
     if (isEditing) {
       formData.append("projectID", modalData.projectID);
     }
 
     formData.append("projectName", modalData.projectName);
     formData.append("description", modalData.description);
-    formData.append("userID", 1); // Example userID
+    formData.append("userID", 1);
 
     if (modalData.imageFile) {
       const resizedImage = await handleImageResize(modalData.imageFile);
       formData.append("image", resizedImage, modalData.imageFile.name);
-    }
-
-    console.log("Sending FormData:");
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
     }
 
     const url = isEditing
@@ -201,31 +194,41 @@ const Projects = () => {
                     <p>{project.description}</p>
                   </div>
                 </div>
-                <div>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => {
-                      setModalData({
-                        projectID: project.projectID, // Ensure this is correctly set
-                        projectName: project.projectName,
-                        description: project.description,
-                        imageFile: null, // Image file is not reloaded during edit
-                      });
-                      setIsEditing(true);
-                      setShowModal(true);
-                    }}
+                <div className="d-flex flex-column align-items-end">
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Edit</Tooltip>}
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(project.projectID)}
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      className="mb-2"
+                      onClick={() => {
+                        setModalData({
+                          projectID: project.projectID,
+                          projectName: project.projectName,
+                          description: project.description,
+                          imageFile: null,
+                        });
+                        setIsEditing(true);
+                        setShowModal(true);
+                      }}
+                    >
+                      <i className="fas fa-pencil-alt"></i>
+                    </Button>
+                  </OverlayTrigger>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip>Delete Project</Tooltip>}
                   >
-                    Delete
-                  </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDelete(project.projectID)}
+                    >
+                      <i className="fas fa-trash"></i>
+                    </Button>
+                  </OverlayTrigger>
                 </div>
               </div>
             </Card.Header>
@@ -239,12 +242,9 @@ const Projects = () => {
         ))
       )}
 
-      {/* Modal for adding/editing projects */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>
-            {isEditing ? "Edit Project" : "Add Project"}
-          </Modal.Title>
+          <Modal.Title>{isEditing ? "Edit Project" : "Add Project"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>

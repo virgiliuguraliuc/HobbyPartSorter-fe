@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Button, Table, Modal, Form } from "react-bootstrap";
+import ConfirmationModal from "./ConfirmationModal";
 
 const ProjectItems = ({ projectID, availableItems }) => {
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState(null);
+
   const [modalData, setModalData] = useState({
     projectItemID: null,
     userItemID: "",
@@ -13,7 +17,9 @@ const ProjectItems = ({ projectID, availableItems }) => {
 
   const fetchProjectItems = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/ProjectsBlob/GetProjectItems/${projectID}`);
+      const response = await fetch(
+        `http://localhost:5000/api/ProjectsBlob/GetProjectItems/${projectID}`
+      );
       const data = await response.json();
       setItems(data);
     } catch (error) {
@@ -23,41 +29,42 @@ const ProjectItems = ({ projectID, availableItems }) => {
 
   const handleSave = async () => {
     const payload = {
-        projectItemID: modalData.projectItemID || null, // Include if editing
-        projectID,
-        userItemID: modalData.userItemID,
-        quantityUsed: parseInt(modalData.quantityUsed, 10),
+      projectItemID: modalData.projectItemID || null, // Include if editing
+      projectID,
+      userItemID: modalData.userItemID,
+      quantityUsed: parseInt(modalData.quantityUsed, 10),
     };
 
     const url = isEditing
-        ? `http://localhost:5000/api/ProjectsBlob/UpdateProjectItem`
-        : `http://localhost:5000/api/ProjectsBlob/AddProjectItem`;
+      ? `http://localhost:5000/api/ProjectsBlob/UpdateProjectItem`
+      : `http://localhost:5000/api/ProjectsBlob/AddProjectItem`;
 
     const method = isEditing ? "PUT" : "POST";
 
     try {
-        const response = await fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-        if (response.ok) {
-            fetchProjectItems();
-            setShowModal(false);
-        } else {
-            console.error("Failed to save project item");
-        }
+      if (response.ok) {
+        fetchProjectItems();
+        setShowModal(false);
+      } else {
+        console.error("Failed to save project item");
+      }
     } catch (error) {
-        console.error("Error saving project item:", error);
+      console.error("Error saving project item:", error);
     }
-};
+  };
 
+  const handleDelete = async () => {
+    if (!selectedForDelete) return;
 
-  const handleDelete = async (projectItemID) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/ProjectsBlob/DeleteProjectItem/${projectItemID}`,
+        `http://localhost:5000/api/ProjectsBlob/DeleteProjectItem/${selectedForDelete.projectItemID}`,
         { method: "DELETE" }
       );
 
@@ -67,7 +74,10 @@ const ProjectItems = ({ projectID, availableItems }) => {
         console.error("Failed to delete project item");
       }
     } catch (error) {
-      console.error("Error deleting project item:", error);
+      console.error("Error deleting item:", error);
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedForDelete(null);
     }
   };
 
@@ -105,8 +115,9 @@ const ProjectItems = ({ projectID, availableItems }) => {
             <tr key={item.projectItemID}>
               <td>
                 {
-                  availableItems.find((availableItem) => availableItem.itemID === item.userItemID)
-                    ?.itemName
+                  availableItems.find(
+                    (availableItem) => availableItem.itemID === item.userItemID
+                  )?.itemName
                 }
               </td>
               <td>{item.quantityUsed}</td>
@@ -126,7 +137,10 @@ const ProjectItems = ({ projectID, availableItems }) => {
                 <Button
                   variant="danger"
                   size="sm"
-                  onClick={() => handleDelete(item.projectItemID)}
+                  onClick={() => {
+                    setSelectedForDelete(item);
+                    setShowDeleteModal(true);
+                  }}
                 >
                   Delete
                 </Button>
@@ -135,11 +149,20 @@ const ProjectItems = ({ projectID, availableItems }) => {
           ))}
         </tbody>
       </Table>
+      <ConfirmationModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${selectedForDelete?.itemName}"?`}
+      />
 
       {/* Modal for adding/editing project items */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Project Item" : "Add Project Item"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Project Item" : "Add Project Item"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -148,7 +171,9 @@ const ProjectItems = ({ projectID, availableItems }) => {
               <Form.Control
                 as="select"
                 value={modalData.userItemID}
-                onChange={(e) => setModalData({ ...modalData, userItemID: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, userItemID: e.target.value })
+                }
               >
                 <option value="">Select an Item</option>
                 {availableItems.map((item) => (
@@ -163,7 +188,9 @@ const ProjectItems = ({ projectID, availableItems }) => {
               <Form.Control
                 type="number"
                 value={modalData.quantityUsed}
-                onChange={(e) => setModalData({ ...modalData, quantityUsed: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, quantityUsed: e.target.value })
+                }
               />
             </Form.Group>
           </Form>

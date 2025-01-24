@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form } from "react-bootstrap";
+import { Card, Button, Table, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import ConfirmationModal from "./ConfirmationModal";
+
 
 const ItemsList = () => {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState(null);
+  
   const [modalData, setModalData] = useState({
     itemID: null,
     itemName: "",
@@ -129,20 +134,20 @@ const ItemsList = () => {
   };
 
   // Delete item
-  const handleDelete = async (itemID) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/ItemsBlob/DeleteItem/${itemID}`,
-        { method: "DELETE" }
-      );
 
-      if (response.ok) {
-        fetchItems();
-      } else {
-        console.error("Failed to delete item");
-      }
+  const handleDeleteConfirm = async () => {
+    if (!selectedForDelete) return;
+  
+    try {
+      await fetch(`http://localhost:5000/api/ItemsBlob/DeleteItem/${selectedForDelete.itemID}`, {
+        method: "DELETE",
+      });
+      fetchItems(); // Refresh items
     } catch (error) {
       console.error("Error deleting item:", error);
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedForDelete(null);
     }
   };
 
@@ -151,13 +156,13 @@ const ItemsList = () => {
     fetchItems();
     fetchCategories();
   }, []);
-
   return (
     <div className="container mt-4">
       <Card>
-        <Card.Header>
+        <Card.Header className="d-flex justify-content-between align-items-center">
           <h4>Items</h4>
           <Button
+            variant="primary"
             onClick={() => {
               setModalData({
                 itemID: null,
@@ -182,7 +187,6 @@ const ItemsList = () => {
             <Table bordered>
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Name</th>
                   <th>Category</th>
                   <th>Weight</th>
@@ -195,7 +199,6 @@ const ItemsList = () => {
               <tbody>
                 {items.map((item) => (
                   <tr key={item.itemID}>
-                    <td>{item.itemID}</td>
                     <td>{item.itemName}</td>
                     <td>
                       {
@@ -216,28 +219,43 @@ const ItemsList = () => {
                         />
                       )}
                     </td>
-                    <td>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        onClick={() => {
-                          setModalData({
-                            ...item,
-                            imageFile: null,
-                          });
-                          setIsEditing(true);
-                          setShowModal(true);
-                        }}
-                      >
-                        Edit
-                      </Button>{" "}
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(item.itemID)}
-                      >
-                        Delete
-                      </Button>
+                    <td className="text-end">
+                      <div className="d-flex justify-content-end gap-2">
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Edit</Tooltip>}
+                        >
+                          <Button
+                            variant="warning"
+                            size="sm"
+                            onClick={() => {
+                              setModalData({
+                                ...item,
+                                imageFile: null,
+                              });
+                              setIsEditing(true);
+                              setShowModal(true);
+                            }}
+                          >
+                            <i className="fas fa-pencil-alt"></i>
+                          </Button>
+                        </OverlayTrigger>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Delete</Tooltip>}
+                        >
+                       <Button
+                variant="danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedForDelete(item); // Set the selected item for delete
+                  setShowDeleteModal(true); // Show the confirmation modal
+                }}
+              >
+                <i className="fas fa-trash"></i>
+              </Button>
+                        </OverlayTrigger>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -246,8 +264,14 @@ const ItemsList = () => {
           )}
         </Card.Body>
       </Card>
-
-      {/* Modal */}
+      <ConfirmationModal
+  show={showDeleteModal}
+  onHide={() => setShowDeleteModal(false)}
+  onConfirm={handleDeleteConfirm}
+  title="Confirm Deletion"
+  message={`Are you sure you want to delete "${selectedForDelete?.itemName}"?`}
+/>
+  
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{isEditing ? "Edit Item" : "Add Item"}</Modal.Title>
@@ -332,6 +356,8 @@ const ItemsList = () => {
       </Modal>
     </div>
   );
+  
+  
 };
 
 export default ItemsList;
