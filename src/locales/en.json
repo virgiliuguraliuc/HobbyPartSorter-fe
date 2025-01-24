@@ -1,0 +1,17 @@
+{
+    "menu": {
+      "brand": "Hobby Part Tracker",
+      "items": "Items",
+      "categories": "Categories",
+      "locations": "Locations",
+      "containers": "Containers",
+      "projects": "Projects"
+    },
+    "languages": {
+      "ro": "Romanian",
+      "fr": "French",
+      "es": "Spanish",
+      "en": "English"
+    }
+  }
+  

@@ -1,0 +1,17 @@
+{
+    "menu": {
+      "brand": "Rastreador de Piezas de Hobby",
+      "items": "Artículos",
+      "categories": "Categorías",
+      "locations": "Ubicaciones",
+      "containers": "Contenedores",
+      "projects": "Proyectos"
+    },
+    "languages": {
+      "ro": "Rumano",
+      "fr": "Francés",
+      "es": "Español",
+      "en": "Inglés"
+    }
+  }
+  

@@ -1,0 +1,17 @@
+{
+    "menu": {
+      "brand": "Tracker Piese Hobby",
+      "items": "Articole",
+      "categories": "Categorii",
+      "locations": "Locații",
+      "containers": "Containere",
+      "projects": "Proiecte"
+    },
+    "languages": {
+      "ro": "Română",
+      "fr": "Franceză",
+      "es": "Spaniolă",
+      "en": "Engleză"
+    }
+  }
+  

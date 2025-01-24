@@ -1,0 +1,17 @@
+{
+    "menu": {
+      "brand": "Suivi des Pièces de Hobby",
+      "items": "Articles",
+      "categories": "Catégories",
+      "locations": "Emplacements",
+      "containers": "Conteneurs",
+      "projects": "Projets"
+    },
+    "languages": {
+      "ro": "Roumain",
+      "fr": "Français",
+      "es": "Espagnol",
+      "en": "Anglais"
+    }
+  }
+  
