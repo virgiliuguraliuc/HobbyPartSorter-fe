@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form } from "react-bootstrap";
+import { Card, Button, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import ProjectItems from "./ProjectItems";
 
 const Projects = () => {
@@ -19,7 +19,9 @@ const Projects = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/ProjectsBlob/GetProjects");
+      const response = await fetch(
+        "http://localhost:5000/api/ProjectsBlob/GetProjects"
+      );
       const data = await response.json();
       setProjects(data);
     } catch (error) {
@@ -32,7 +34,9 @@ const Projects = () => {
   // Fetch available items for Project Items dropdown
   const fetchAvailableItems = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/ItemsBlob/GetItems");
+      const response = await fetch(
+        "http://localhost:5000/api/ItemsBlob/GetItems"
+      );
       const data = await response.json();
       setAvailableItems(data);
     } catch (error) {
@@ -45,22 +49,22 @@ const Projects = () => {
     fetchAvailableItems();
   }, []);
 
- // Function to resize image
-const handleImageResize = (file) => {
+  // Function to resize image
+  const handleImageResize = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-  
+
       reader.onload = (event) => {
         const img = new Image();
         img.src = event.target.result;
-  
+
         img.onload = () => {
           const canvas = document.createElement("canvas");
           const maxDimension = 80;
-  
+
           let width = img.width;
           let height = img.height;
-  
+
           if (width > maxDimension || height > maxDimension) {
             if (width > height) {
               height = (height * maxDimension) / width;
@@ -70,52 +74,62 @@ const handleImageResize = (file) => {
               height = maxDimension;
             }
           }
-  
+
           canvas.width = width;
           canvas.height = height;
-  
+
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
-  
+
           canvas.toBlob((blob) => {
             resolve(blob);
           }, file.type || "image/jpeg");
         };
-  
+
         img.onerror = (error) => reject(error);
       };
-  
+
       reader.onerror = (error) => reject(error);
-  
+
       reader.readAsDataURL(file);
     });
   };
-  
+
   // Handle save function
   const handleSave = async () => {
     const formData = new FormData();
+
+    // Only include projectID if updating an existing project
+    if (isEditing) {
+      formData.append("projectID", modalData.projectID);
+    }
+
     formData.append("projectName", modalData.projectName);
     formData.append("description", modalData.description);
     formData.append("userID", 1); // Example userID
+
     if (modalData.imageFile) {
       const resizedImage = await handleImageResize(modalData.imageFile);
       formData.append("image", resizedImage, modalData.imageFile.name);
     }
 
+    console.log("Sending FormData:");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
     const url = isEditing
       ? "http://localhost:5000/api/ProjectsBlob/UpdateProject"
       : "http://localhost:5000/api/ProjectsBlob/AddProject";
-  
-    const method = isEditing ? "PUT" : "POST";
-  
-    try {
-        console.log("Sending PUT request for project update:", modalData);
 
+    const method = isEditing ? "PUT" : "POST";
+
+    try {
       const response = await fetch(url, {
         method,
         body: formData,
       });
-  
+
       if (response.ok) {
         fetchProjects();
         setShowModal(false);
@@ -126,9 +140,6 @@ const handleImageResize = (file) => {
       console.error("Error saving project:", error);
     }
   };
-  
-
-
 
   const handleDelete = async (projectID) => {
     try {
@@ -170,16 +181,19 @@ const handleImageResize = (file) => {
       ) : (
         projects.map((project) => (
           <Card key={project.projectID} className="mb-4">
-              <Card.Header>
+            <Card.Header>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
                   {project.image && (
                     <img
-                      src={`data:image/png;base64,${btoa(
-                        String.fromCharCode(...new Uint8Array(project.image.data))
-                      )}`}
+                      src={`data:image/jpeg;base64,${project.image}`}
                       alt={project.projectName}
-                      style={{ width: "80px", height: "80px", marginRight: "15px", borderRadius: "5px" }}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        marginRight: "15px",
+                        borderRadius: "5px",
+                      }}
                     />
                   )}
                   <div>
@@ -194,8 +208,10 @@ const handleImageResize = (file) => {
                     className="me-2"
                     onClick={() => {
                       setModalData({
-                        ...project,
-                        imageFile: null,
+                        projectID: project.projectID, // Ensure this is correctly set
+                        projectName: project.projectName,
+                        description: project.description,
+                        imageFile: null, // Image file is not reloaded during edit
                       });
                       setIsEditing(true);
                       setShowModal(true);
@@ -214,7 +230,10 @@ const handleImageResize = (file) => {
               </div>
             </Card.Header>
             <Card.Body>
-              <ProjectItems projectID={project.projectID} availableItems={availableItems} />
+              <ProjectItems
+                projectID={project.projectID}
+                availableItems={availableItems}
+              />
             </Card.Body>
           </Card>
         ))
@@ -223,7 +242,9 @@ const handleImageResize = (file) => {
       {/* Modal for adding/editing projects */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Project" : "Add Project"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Project" : "Add Project"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -232,7 +253,9 @@ const handleImageResize = (file) => {
               <Form.Control
                 type="text"
                 value={modalData.projectName}
-                onChange={(e) => setModalData({ ...modalData, projectName: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, projectName: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group>
@@ -240,14 +263,23 @@ const handleImageResize = (file) => {
               <Form.Control
                 as="textarea"
                 value={modalData.description}
-                onChange={(e) => setModalData({ ...modalData, description: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, description: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group>
               <Form.Label>Image</Form.Label>
               <Form.Control
                 type="file"
-                onChange={(e) => setModalData({ ...modalData, imageFile: e.target.files[0] })}
+                onChange={(e) => {
+                  if (e.target.files[0]) {
+                    setModalData({
+                      ...modalData,
+                      imageFile: e.target.files[0],
+                    });
+                  }
+                }}
               />
             </Form.Group>
           </Form>
