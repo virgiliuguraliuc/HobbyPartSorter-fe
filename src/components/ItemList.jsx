@@ -108,26 +108,29 @@ const ItemsList = () => {
       ? "http://localhost:5000/api/ItemsBlob/UpdateItem"
       : "http://localhost:5000/api/ItemsBlob/AddItem";
     const method = isEditing ? "PUT" : "POST";
-
+  
     try {
       const formData = new FormData();
+      if (isEditing) {
+        formData.append("itemID", modalData.itemID); //cum sa il uiti
+      }
       formData.append("itemName", modalData.itemName);
       formData.append("categoryID", modalData.categoryID);
       formData.append("weight", modalData.weight);
       formData.append("price", modalData.price);
       formData.append("description", modalData.description);
-      formData.append("userID", 1); // Example userID
-
+      formData.append("userID", 1); // Hardcoded user ID
+  
       if (modalData.imageFile) {
         const resizedImage = await handleImageResize(modalData.imageFile);
         formData.append("image", resizedImage, modalData.imageFile.name);
       }
-
+  
       const response = await fetch(url, {
         method,
         body: formData,
       });
-
+  
       if (response.ok) {
         fetchItems();
         setShowModal(false);
@@ -138,6 +141,7 @@ const ItemsList = () => {
       console.error("Error saving item:", error);
     }
   };
+  
 
   // Delete item
 

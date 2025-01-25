@@ -7,7 +7,7 @@ import Locations from './components/Locations';
 import Containers from './components/Containers';
 import Projects from './components/Projects';
 import LanguageProvider from './components/LanguageProvider'; // Import the LanguageProvider
-
+//ADAUGA CEVA P/ YEP AI UITAT
 const App = () => {
     return (
         <LanguageProvider>
@@ -20,7 +20,7 @@ const App = () => {
                         <Route path="/locations" element={<Locations />} />
                         <Route path="/containers" element={<Containers />} />
                         <Route path="/projects" element={<Projects />} />
-                        <Route path="/" element={<h1>Welcome to Hobby Part Tracker</h1>} />
+                        <Route path="/" element={<h1>Welcome to Hobby Part Tracker</h1>} />  
                     </Routes>
                 </div>
             </Router>
