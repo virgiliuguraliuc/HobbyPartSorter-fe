@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Table,
+  Modal,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
-
 
 const ItemsList = () => {
   const [items, setItems] = useState([]);
@@ -10,7 +17,6 @@ const ItemsList = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState(null);
-  
   const [modalData, setModalData] = useState({
     itemID: null,
     itemName: "",
@@ -137,11 +143,14 @@ const ItemsList = () => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedForDelete) return;
-  
+
     try {
-      await fetch(`http://localhost:5000/api/ItemsBlob/DeleteItem/${selectedForDelete.itemID}`, {
-        method: "DELETE",
-      });
+      await fetch(
+        `http://localhost:5000/api/ItemsBlob/DeleteItem/${selectedForDelete.itemID}`,
+        {
+          method: "DELETE",
+        }
+      );
       fetchItems(); // Refresh items
     } catch (error) {
       console.error("Error deleting item:", error);
@@ -244,16 +253,16 @@ const ItemsList = () => {
                           placement="top"
                           overlay={<Tooltip>Delete</Tooltip>}
                         >
-                       <Button
-                variant="danger"
-                size="sm"
-                onClick={() => {
-                  setSelectedForDelete(item); // Set the selected item for delete
-                  setShowDeleteModal(true); // Show the confirmation modal
-                }}
-              >
-                <i className="fas fa-trash"></i>
-              </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedForDelete(item); 
+                              setShowDeleteModal(true); 
+                            }}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </Button>
                         </OverlayTrigger>
                       </div>
                     </td>
@@ -265,13 +274,13 @@ const ItemsList = () => {
         </Card.Body>
       </Card>
       <ConfirmationModal
-  show={showDeleteModal}
-  onHide={() => setShowDeleteModal(false)}
-  onConfirm={handleDeleteConfirm}
-  title="Confirm Deletion"
-  message={`Are you sure you want to delete "${selectedForDelete?.itemName}"?`}
-/>
-  
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${selectedForDelete?.itemName}"?`}
+      />
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{isEditing ? "Edit Item" : "Add Item"}</Modal.Title>
@@ -356,8 +365,6 @@ const ItemsList = () => {
       </Modal>
     </div>
   );
-  
-  
 };
 
 export default ItemsList;
