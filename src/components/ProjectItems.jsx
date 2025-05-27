@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Button, Table, Modal, Form } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
+import { authFetch } from "../utils/authFetch";
 
-const ProjectItems = ({ projectID, availableItems }) => {
+const ProjectItems = ({ ProjectID, availableItems }) => {
   const [items, setItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState(null);
 
   const [modalData, setModalData] = useState({
-    projectItemID: null,
-    userItemID: "",
-    quantityUsed: 1,
+    ProjectItemID: null,
+    UserItemID: "",
+    QuantityUsed: 1,
   });
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchProjectItems = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/ProjectsBlob/GetProjectItems/${projectID}`
+      const response = await authFetch(
+        `http://localhost:5000/api/ProjectsBlob/GetProjectItems/${ProjectID}`
       );
       const data = await response.json();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error loading project items:", error);
     }
@@ -29,20 +30,20 @@ const ProjectItems = ({ projectID, availableItems }) => {
 
   const handleSave = async () => {
     const payload = {
-      projectItemID: modalData.projectItemID || null, // Include if editing
-      projectID,
-      userItemID: modalData.userItemID,
-      quantityUsed: parseInt(modalData.quantityUsed, 10),
+      ProjectItemID: modalData.ProjectItemID || null,
+      ProjectID,
+      UserItemID: parseInt(modalData.UserItemID),
+      QuantityUsed: parseInt(modalData.QuantityUsed, 10),
     };
 
     const url = isEditing
-      ? `http://localhost:5000/api/ProjectsBlob/UpdateProjectItem`
-      : `http://localhost:5000/api/ProjectsBlob/AddProjectItem`;
+      ? "http://localhost:5000/api/ProjectsBlob/UpdateProjectItem"
+      : "http://localhost:5000/api/ProjectsBlob/AddProjectItem";
 
     const method = isEditing ? "PUT" : "POST";
 
     try {
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -63,8 +64,8 @@ const ProjectItems = ({ projectID, availableItems }) => {
     if (!selectedForDelete) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/ProjectsBlob/DeleteProjectItem/${selectedForDelete.projectItemID}`,
+      const response = await authFetch(
+        `http://localhost:5000/api/ProjectsBlob/DeleteProjectItem/${selectedForDelete.ProjectItemID}`,
         { method: "DELETE" }
       );
 
@@ -83,7 +84,7 @@ const ProjectItems = ({ projectID, availableItems }) => {
 
   useEffect(() => {
     fetchProjectItems();
-  }, []);
+  }, [ProjectID]);
 
   return (
     <div>
@@ -92,9 +93,9 @@ const ProjectItems = ({ projectID, availableItems }) => {
         size="sm"
         onClick={() => {
           setModalData({
-            projectItemID: null,
-            userItemID: "",
-            quantityUsed: 1,
+            ProjectItemID: null,
+            UserItemID: "",
+            QuantityUsed: 1,
           });
           setIsEditing(false);
           setShowModal(true);
@@ -102,6 +103,7 @@ const ProjectItems = ({ projectID, availableItems }) => {
       >
         Add Project Item
       </Button>
+
       <Table bordered size="sm">
         <thead>
           <tr>
@@ -111,53 +113,52 @@ const ProjectItems = ({ projectID, availableItems }) => {
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
-            <tr key={item.projectItemID}>
-              <td>
-                {
-                  availableItems.find(
-                    (availableItem) => availableItem.itemID === item.userItemID
-                  )?.itemName
-                }
-              </td>
-              <td>{item.quantityUsed}</td>
-              <td>
-                <Button
-                  variant="warning"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => {
-                    setModalData(item);
-                    setIsEditing(true);
-                    setShowModal(true);
-                  }}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedForDelete(item);
-                    setShowDeleteModal(true);
-                  }}
-                >
-                  Delete
-                </Button>
-              </td>
-            </tr>
-          ))}
+          {items.map((item) => {
+            const matchedItem = availableItems.find(
+              (av) => av.UserItemID === item.UserItemID
+            );
+            return (
+              <tr key={item.ProjectItemID}>
+                <td>{matchedItem?.ItemName || "Unknown"}</td>
+                <td>{item.QuantityUsed}</td>
+                <td>
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => {
+                      setModalData(item);
+                      setIsEditing(true);
+                      setShowModal(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedForDelete(item);
+                      setShowDeleteModal(true);
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </Table>
+
       <ConfirmationModal
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         title="Confirm Deletion"
-        message={`Are you sure you want to delete "${selectedForDelete?.itemName}"?`}
+        message={`Are you sure you want to delete this project item?`}
       />
 
-      {/* Modal for adding/editing project items */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
@@ -170,15 +171,15 @@ const ProjectItems = ({ projectID, availableItems }) => {
               <Form.Label>Item</Form.Label>
               <Form.Control
                 as="select"
-                value={modalData.userItemID}
+                value={modalData.UserItemID}
                 onChange={(e) =>
-                  setModalData({ ...modalData, userItemID: e.target.value })
+                  setModalData({ ...modalData, UserItemID: e.target.value })
                 }
               >
                 <option value="">Select an Item</option>
                 {availableItems.map((item) => (
-                  <option key={item.itemID} value={item.itemID}>
-                    {item.itemName}
+                  <option key={item.UserItemID} value={item.UserItemID}>
+                    {item.ItemName} (Qty: {item.Quantity})
                   </option>
                 ))}
               </Form.Control>
@@ -187,9 +188,9 @@ const ProjectItems = ({ projectID, availableItems }) => {
               <Form.Label>Quantity Used</Form.Label>
               <Form.Control
                 type="number"
-                value={modalData.quantityUsed}
+                value={modalData.QuantityUsed}
                 onChange={(e) =>
-                  setModalData({ ...modalData, quantityUsed: e.target.value })
+                  setModalData({ ...modalData, QuantityUsed: e.target.value })
                 }
               />
             </Form.Group>

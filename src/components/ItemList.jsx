@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
+import { authFetch } from "../utils/authFetch";
 
 const ItemsList = () => {
   const [items, setItems] = useState([]);
@@ -19,20 +20,63 @@ const ItemsList = () => {
   const [selectedForDelete, setSelectedForDelete] = useState(null);
   const [modalData, setModalData] = useState({
     itemID: null,
-    itemName: "",
-    categoryID: "",
-    weight: "",
-    price: "",
-    description: "",
-    imageFile: null,
+    ItemName: "",
+    CategoryID: "",
+    Weight: "",
+    Price: "",
+    Quantity: "",
+    Description: "",
+    ImageFile: null,
   });
+  const [collapsed, setCollapsed] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [sortField, setSortField] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedItems = [...items].sort((a, b) => {
+    if (!sortField) return 0;
+    let valA = a[sortField];
+    let valB = b[sortField];
+    if (sortField === "CategoryName") {
+      valA =
+        categories.find((c) => c.CategoryID === a.CategoryID)?.CategoryName ||
+        "";
+      valB =
+        categories.find((c) => c.CategoryID === b.CategoryID)?.CategoryName ||
+        "";
+    }
+    if (typeof valA === "string") {
+      return sortOrder === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    } else {
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    }
+  });
+  const toggleAllDetails = () => {
+    const allExpanded = Object.values(expandedRows).every((v) => v === true);
+    const newState = {};
+    items.forEach((item) => {
+      newState[item.itemID] = !allExpanded; // ✅ consistent with row logic
+    });
+    setExpandedRows(newState);
+  };
 
   // Fetch items and categories
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
+      const response = await authFetch(
         "http://localhost:5000/api/ItemsBlob/GetItems"
       );
       const data = await response.json();
@@ -46,7 +90,7 @@ const ItemsList = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch(
+      const response = await authFetch(
         "http://localhost:5000/api/ItemsBlob/GetCategories"
       );
       const data = await response.json();
@@ -56,7 +100,7 @@ const ItemsList = () => {
     }
   };
 
-  // Resize image before upload
+  // Resize Image before upload
   const handleImageResize = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -90,7 +134,7 @@ const ItemsList = () => {
 
           canvas.toBlob((blob) => {
             resolve(blob);
-          }, file.type || "image/jpeg");
+          }, file.type || "Image/jpeg");
         };
 
         img.onerror = (error) => reject(error);
@@ -107,30 +151,33 @@ const ItemsList = () => {
     const url = isEditing
       ? "http://localhost:5000/api/ItemsBlob/UpdateItem"
       : "http://localhost:5000/api/ItemsBlob/AddItem";
-    const method = isEditing ? "PUT" : "POST";
-  
+    const method = isEditing ? "POST" : "POST";
+
     try {
       const formData = new FormData();
-      if (isEditing) {
+      if (isEditing && modalData.itemID !== null) {
         formData.append("itemID", modalData.itemID); //cum sa il uiti
       }
-      formData.append("itemName", modalData.itemName);
-      formData.append("categoryID", modalData.categoryID);
-      formData.append("weight", modalData.weight);
-      formData.append("price", modalData.price);
-      formData.append("description", modalData.description);
-      formData.append("userID", 1); // Hardcoded user ID
-  
-      if (modalData.imageFile) {
-        const resizedImage = await handleImageResize(modalData.imageFile);
-        formData.append("image", resizedImage, modalData.imageFile.name);
+      formData.append("itemName", modalData.ItemName);
+      formData.append("categoryID", modalData.CategoryID);
+      formData.append("weight", modalData.Weight);
+      formData.append("price", modalData.Price);
+      formData.append("description", modalData.Description || "");
+      formData.append("quantity", modalData.Quantity || "");
+
+      if (modalData.ImageFile) {
+        const resizedImage = await handleImageResize(modalData.ImageFile);
+        formData.append("image", resizedImage, modalData.ImageFile.name);
       }
-  
-      const response = await fetch(url, {
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      const response = await authFetch(url, {
         method,
         body: formData,
       });
-  
+
       if (response.ok) {
         fetchItems();
         setShowModal(false);
@@ -141,7 +188,6 @@ const ItemsList = () => {
       console.error("Error saving item:", error);
     }
   };
-  
 
   // Delete item
 
@@ -149,8 +195,8 @@ const ItemsList = () => {
     if (!selectedForDelete) return;
 
     try {
-      await fetch(
-        `http://localhost:5000/api/ItemsBlob/DeleteItem/${selectedForDelete.itemID}`,
+      await authFetch(
+        `http://localhost:5000/api/ItemsBlob/DeleteItem/${selectedForDelete.ItemID}`,
         {
           method: "DELETE",
         }
@@ -169,120 +215,255 @@ const ItemsList = () => {
     fetchItems();
     fetchCategories();
   }, []);
+
+  const toggleDetails = (id) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
   return (
-    <div className="container mt-4">
+    <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h4>Items</h4>
-          <Button
-            variant="primary"
-            onClick={() => {
-              setModalData({
-                itemID: null,
-                itemName: "",
-                categoryID: categories[0]?.categoryID || "",
-                weight: "",
-                price: "",
-                description: "",
-                imageFile: null,
-              });
-              setIsEditing(false);
-              setShowModal(true);
-            }}
-          >
-            Add Item
-          </Button>
+          <div className="d-flex gap-2">
+            <Button variant="primary">Add Item</Button>
+            <Button
+              variant="outline-secondary"
+              style={{ backgroundColor: "transparent", borderColor: "#6c757d" }}
+              onClick={() => setCollapsed((prev) => !prev)}
+            >
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+                style={{ color: "#6c757d" }}
+              ></i>
+            </Button>
+          </div>
         </Card.Header>
-        <Card.Body>
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <Table bordered>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Category</th>
-                  <th>Weight</th>
-                  <th>Price</th>
-                  <th>Description</th>
-                  <th>Image</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.itemID}>
-                    <td>{item.itemName}</td>
-                    <td>
-                      {
-                        categories.find(
-                          (cat) => cat.categoryID === item.categoryID
-                        )?.categoryName
-                      }
-                    </td>
-                    <td>{item.weight}</td>
-                    <td>{item.price}</td>
-                    <td>{item.description}</td>
-                    <td>
-                      {item.image && (
-                        <img
-                          src={`data:image/png;base64,${item.image}`}
-                          alt={item.itemName}
-                          style={{ width: "50px", height: "50px" }}
+        {!collapsed && (
+          <Card.Body>
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <Table bordered responsive>
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>
+                      Details
+                      <Button
+                        size="sm"
+                        variant="light"
+                        onClick={toggleAllDetails}
+                        className="ms-2"
+                      >
+                        <i className="bi bi-eye"></i>
+                      </Button>
+                    </th>
+                    <th>
+                      <span className="d-none d-sm-inline">Weight</span> (kg)
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() => handleSort("Weight")}
+                        className=""
+                      >
+                        <i
+                          className={`bi ${
+                            sortField === "Weight"
+                              ? sortOrder === "asc"
+                                ? "bi-sort-up"
+                                : "bi-sort-down"
+                              : "bi-arrow-down-up"
+                          }`}
                         />
-                      )}
-                    </td>
-                    <td className="text-end">
-                      <div className="d-flex justify-content-end gap-2">
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={<Tooltip>Edit</Tooltip>}
-                        >
-                          <Button
-                            variant="warning"
-                            size="sm"
-                            onClick={() => {
-                              setModalData({
-                                ...item,
-                                imageFile: null,
-                              });
-                              setIsEditing(true);
-                              setShowModal(true);
-                            }}
-                          >
-                            <i className="fas fa-pencil-alt"></i>
-                          </Button>
-                        </OverlayTrigger>
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={<Tooltip>Delete</Tooltip>}
-                        >
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedForDelete(item); 
-                              setShowDeleteModal(true); 
-                            }}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </Button>
-                        </OverlayTrigger>
-                      </div>
-                    </td>
+                      </Button>
+                    </th>
+
+                    <th>
+                      <span className="d-none d-sm-inline">Price</span> ($)
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() => handleSort("Price")}
+                        className=""
+                      >
+                        <i
+                          className={`bi  ${
+                            sortField === "Price"
+                              ? sortOrder === "asc"
+                                ? "bi-sort-up"
+                                : "bi-sort-down"
+                              : "bi-arrow-down-up"
+                          }`}
+                        />
+                      </Button>
+                    </th>
+
+                    <th>
+                      <span className="d-none d-sm-inline"></span> (Cat.)
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() => handleSort("CategoryName")}
+                        className=""
+                      >
+                        <i
+                          className={`bi ${
+                            sortField === "CategoryName"
+                              ? sortOrder === "asc"
+                                ? "bi-sort-up"
+                                : "bi-sort-down"
+                              : "bi-arrow-down-up"
+                          }`}
+                        />
+                      </Button>
+                    </th>
+
+                    <th>
+                      <span className="d-none d-sm-inline">Quant.</span> (#)
+                      <Button
+                        variant="light"
+                        size="sm"
+                        onClick={() => handleSort("Quantity")}
+                        className=""
+                      >
+                        <i
+                          className={`bi ${
+                            sortField === "Quantity"
+                              ? sortOrder === "asc"
+                                ? "bi-sort-up"
+                                : "bi-sort-down"
+                              : "bi-arrow-down-up"
+                          }`}
+                        />
+                      </Button>
+                    </th>
+
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
+                </thead>
+                <tbody>
+                  {sortedItems.map((item) => {
+                    const categoryName =
+                      categories.find(
+                        (cat) => cat.CategoryID === item.CategoryID
+                      )?.CategoryName || "Unknown";
+                    return (
+                      <tr key={item.itemID}>
+                        <td>
+                            <div className="text-end">
+                          {item.Image && (
+                            <img
+                              src={`data:Image/png;base64,${item.Image}`}
+                              alt={item.ItemName}
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          )}
+                          </div>
+                        </td>
+                        <td>
+                          {" "}
+                          <div className="text-end">{item.ItemName} </div>
+                        </td>
+                        <td>
+                          <div
+                            className="text-muted text-truncate"
+                            style={{ maxWidth: 150, whiteSpace: "nowrap" }}
+                          >
+                            <div className="text-end"> 
+                            {expandedRows[item.itemID]
+                              ? item.Description
+                              : "..."}
+                              </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="text-end">{item.Weight} kg </div>
+                        </td>
+                        <td>
+                          <div className="text-end">
+                          {item.Price} $
+                          </div>
+                        </td>
+                        <td>
+                          <div className="text-end">
+                          {categoryName}
+                          </div>
+                          </td>
+                        <td>
+                          <div className="text-end">
+                          {item.Quantity}
+                          </div>
+                          </td>
+                        <td className="text-end">
+                          <div className="d-flex justify-content-end gap-2">
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={<Tooltip>Edit</Tooltip>}
+                            >
+                              <Button
+                                variant="warning"
+                                size="sm"
+                                onClick={() => {
+                                  setModalData({
+                                    itemID: item.itemID,
+                                    ItemName: item.ItemName,
+                                    CategoryID: item.CategoryID,
+                                    Weight: item.Weight,
+                                    Price: item.Price,
+                                    Description: item.Description,
+                                    Quantity: item.Quantity,
+                                    ImageFile: null, // image is not preloaded, but upload still works
+                                  });
+                                  setIsEditing(true);
+                                  setShowModal(true);
+                                }}
+                              >
+                                <i className="fas fa-pencil-alt"></i>
+                              </Button>
+                            </OverlayTrigger>
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={<Tooltip>Delete</Tooltip>}
+                            >
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedForDelete(item);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <i className="fas fa-trash"></i>
+                              </Button>
+                            </OverlayTrigger>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            )}
+          </Card.Body>
+        )}
       </Card>
       <ConfirmationModal
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteConfirm}
         title="Confirm Deletion"
-        message={`Are you sure you want to delete "${selectedForDelete?.itemName}"?`}
+        message={`Are you sure you want to delete "${selectedForDelete?.ItemName}"?`}
       />
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -295,9 +476,9 @@ const ItemsList = () => {
               <Form.Label>Item Name</Form.Label>
               <Form.Control
                 type="text"
-                value={modalData.itemName}
+                value={modalData.ItemName}
                 onChange={(e) =>
-                  setModalData({ ...modalData, itemName: e.target.value })
+                  setModalData({ ...modalData, ItemName: e.target.value })
                 }
               />
             </Form.Group>
@@ -305,14 +486,14 @@ const ItemsList = () => {
               <Form.Label>Category</Form.Label>
               <Form.Control
                 as="select"
-                value={modalData.categoryID}
+                value={modalData.CategoryID}
                 onChange={(e) =>
-                  setModalData({ ...modalData, categoryID: e.target.value })
+                  setModalData({ ...modalData, CategoryID: e.target.value })
                 }
               >
-                {categories.map((category) => (
-                  <option key={category.categoryID} value={category.categoryID}>
-                    {category.categoryName}
+                {categories.map((Category) => (
+                  <option key={Category.CategoryID} value={Category.CategoryID}>
+                    {Category.CategoryName}
                   </option>
                 ))}
               </Form.Control>
@@ -321,9 +502,9 @@ const ItemsList = () => {
               <Form.Label>Weight</Form.Label>
               <Form.Control
                 type="number"
-                value={modalData.weight}
+                value={modalData.Weight}
                 onChange={(e) =>
-                  setModalData({ ...modalData, weight: e.target.value })
+                  setModalData({ ...modalData, Weight: e.target.value })
                 }
               />
             </Form.Group>
@@ -331,9 +512,9 @@ const ItemsList = () => {
               <Form.Label>Price</Form.Label>
               <Form.Control
                 type="number"
-                value={modalData.price}
+                value={modalData.Price}
                 onChange={(e) =>
-                  setModalData({ ...modalData, price: e.target.value })
+                  setModalData({ ...modalData, Price: e.target.value })
                 }
               />
             </Form.Group>
@@ -341,9 +522,19 @@ const ItemsList = () => {
               <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
-                value={modalData.description}
+                value={modalData.Description}
                 onChange={(e) =>
-                  setModalData({ ...modalData, description: e.target.value })
+                  setModalData({ ...modalData, Description: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Quantity</Form.Label>
+              <Form.Control
+                as="textarea"
+                value={modalData.Quantity}
+                onChange={(e) =>
+                  setModalData({ ...modalData, Quantity: e.target.value })
                 }
               />
             </Form.Group>
@@ -352,7 +543,7 @@ const ItemsList = () => {
               <Form.Control
                 type="file"
                 onChange={(e) =>
-                  setModalData({ ...modalData, imageFile: e.target.files[0] })
+                  setModalData({ ...modalData, ImageFile: e.target.files[0] })
                 }
               />
             </Form.Group>

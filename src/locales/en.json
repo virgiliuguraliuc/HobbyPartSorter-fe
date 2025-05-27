@@ -5,7 +5,13 @@
       "categories": "Categories",
       "locations": "Locations",
       "containers": "Containers",
-      "projects": "Projects"
+      "projects": "Projects",
+      "storage":"Storage",
+      "logout":"Logout",
+      "language":"Language",
+      "inventory":"Inventory",
+      "guide":"Guide",
+      "support":"Support"
     },
     "languages": {
       "ro": "Romanian",

@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
+import { authFetch } from "../utils/authFetch";
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -17,18 +18,18 @@ const Locations = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState(null);
   const [modalData, setModalData] = useState({
-    locationID: null,
-    locationName: "",
-    locationType: "",
-    address: "",
+    LocationID: null,
+    LocationName: "",
+    LocationType: "",
+    Address: "",
   });
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchLocations = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/Items/GetLocations"
+      const response = await authFetch(
+        "http://localhost:5000/api/locations/GetLocations"
       );
       if (!response.ok) throw new Error("Failed to fetch locations");
       const data = await response.json();
@@ -42,12 +43,12 @@ const Locations = () => {
 
   const handleSave = async () => {
     const url = isEditing
-      ? "http://localhost:5000/api/Items/UpdateLocation"
-      : "http://localhost:5000/api/Items/AddLocation";
+      ? "http://localhost:5000/api/locations/UpdateLocation"
+      : "http://localhost:5000/api/locations/AddLocation";
     const method = isEditing ? "PUT" : "POST";
 
     try {
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(modalData),
@@ -66,8 +67,8 @@ const Locations = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/Items/DeleteLocation/${selectedForDelete.locationID}`,
+      const response = await authFetch(
+        `http://localhost:5000/api/locations/DeleteLocation/${selectedForDelete.LocationID}`,
         { method: "DELETE" }
       );
 
@@ -88,14 +89,14 @@ const Locations = () => {
   }, []);
 
   return (
-    <div className="container mt-4">
+    <div className="mt-4">
       <Card>
         <Card.Header as="h2" className="d-flex justify-content-between align-items-center">
           <span>Locations</span>
           <Button
             variant="primary"
             onClick={() => {
-              setModalData({ locationID: null, locationName: "", locationType: "", address: "" });
+              setModalData({ LocationID: null, LocationName: "", LocationType: "", Address: "" });
               setIsEditing(false);
               setShowModal(true);
             }}
@@ -115,10 +116,10 @@ const Locations = () => {
             </thead>
             <tbody>
               {locations.map((location) => (
-                <tr key={location.locationID}>
-                  <td>{location.locationName}</td>
-                  <td>{location.locationType || "N/A"}</td>
-                  <td>{location.address || "N/A"}</td>
+                <tr key={location.LocationID}>
+                  <td>{location.LocationName}</td>
+                  <td>{location.LocationType || "N/A"}</td>
+                  <td>{location.Address || "N/A"}</td>
                   <td className="text-end">
                     <div className="d-flex justify-content-end gap-2">
                       <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
@@ -166,24 +167,24 @@ const Locations = () => {
               <Form.Label>Location Name</Form.Label>
               <Form.Control
                 type="text"
-                value={modalData.locationName}
-                onChange={(e) => setModalData({ ...modalData, locationName: e.target.value })}
+                value={modalData.LocationName}
+                onChange={(e) => setModalData({ ...modalData, LocationName: e.target.value })}
               />
             </Form.Group>
             <Form.Group>
               <Form.Label>Location Type</Form.Label>
               <Form.Control
                 type="text"
-                value={modalData.locationType}
-                onChange={(e) => setModalData({ ...modalData, locationType: e.target.value })}
+                value={modalData.LocationType}
+                onChange={(e) => setModalData({ ...modalData, LocationType: e.target.value })}
               />
             </Form.Group>
             <Form.Group>
               <Form.Label>Address</Form.Label>
               <Form.Control
                 type="text"
-                value={modalData.address}
-                onChange={(e) => setModalData({ ...modalData, address: e.target.value })}
+                value={modalData.Address}
+                onChange={(e) => setModalData({ ...modalData, Address: e.target.value })}
               />
             </Form.Group>
           </Form>
@@ -204,7 +205,7 @@ const Locations = () => {
         onHide={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         title="Confirm Deletion"
-        message={`Are you sure you want to delete "${selectedForDelete?.locationName}"?`}
+        message={`Are you sure you want to delete "${selectedForDelete?.LocationName}"?`}
       />
     </div>
   );

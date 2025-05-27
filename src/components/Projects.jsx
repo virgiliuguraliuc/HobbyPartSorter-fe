@@ -1,30 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import ProjectItems from "./ProjectItems";
+import { authFetch } from "../utils/authFetch";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
-  const [availableItems, setAvailableItems] = useState([]); // Ensure it's initialized as an empty array
+  const [availableItems, setAvailableItems] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedContainer, setSelectedContainer] = useState(null);
-  
   const [modalData, setModalData] = useState({
-    projectID: null,
-    projectName: "",
-    description: "",
+    ProjectID: null,
+    ProjectName: "",
+    Description: "",
     imageFile: null,
   });
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch projects
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/ProjectsBlob/GetProjects");
+      const response = await authFetch("http://localhost:5000/api/ProjectsBlob/GetProjects");
       const data = await response.json();
-      setProjects(data);
+      setProjects(data || []);
     } catch (error) {
       console.error("Error loading projects:", error);
     } finally {
@@ -32,115 +29,95 @@ const Projects = () => {
     }
   };
 
-  // Fetch available items for Project Items dropdown
-  const fetchAvailableItems = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/ItemsBlob/GetItems");
-      const data = await response.json();
-      setAvailableItems(data || []); // Ensure data is an array
-    } catch (error) {
-      console.error("Error loading items:", error);
-    }
-  };
+const fetchAvailableItems = async () => {
+  try {
+    const response = await authFetch("http://localhost:5000/api/UserItemsBlob/GetUserItems"); // <-- New route
+    const data = await response.json();
+    setAvailableItems(data || []);
+  } catch (error) {
+    console.error("Error loading user items:", error);
+  }
+};
+
+
 
   useEffect(() => {
     fetchProjects();
     fetchAvailableItems();
   }, []);
 
-  // Function to resize image
   const handleImageResize = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
       reader.onload = (event) => {
         const img = new Image();
         img.src = event.target.result;
-
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const maxDimension = 80;
-
+          const maxDim = 80;
           let width = img.width;
           let height = img.height;
-
-          if (width > maxDimension || height > maxDimension) {
+          if (width > maxDim || height > maxDim) {
             if (width > height) {
-              height = (height * maxDimension) / width;
-              width = maxDimension;
+              height = (height * maxDim) / width;
+              width = maxDim;
             } else {
-              width = (width * maxDimension) / height;
-              height = maxDimension;
+              width = (width * maxDim) / height;
+              height = maxDim;
             }
           }
-
           canvas.width = width;
           canvas.height = height;
-
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob((blob) => {
-            resolve(blob);
-          }, file.type || "image/jpeg");
+          canvas.toBlob((blob) => resolve(blob), file.type || "image/jpeg");
         };
-
-        img.onerror = (error) => reject(error);
+        img.onerror = reject;
       };
-
-      reader.onerror = (error) => reject(error);
-
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
-  // Handle save function
   const handleSave = async () => {
     const formData = new FormData();
-
-    if (isEditing) {
-      formData.append("projectID", modalData.projectID);
+    if (isEditing && modalData.ProjectID !== null) {
+      formData.append("projectID", modalData.ProjectID);
     }
-
-    formData.append("projectName", modalData.projectName);
-    formData.append("description", modalData.description);
-    formData.append("userID", 1);
+    formData.append("projectName", modalData.ProjectName);
+    formData.append("description", modalData.Description || "");
 
     if (modalData.imageFile) {
-      const resizedImage = await handleImageResize(modalData.imageFile);
-      formData.append("image", resizedImage, modalData.imageFile.name);
+      const resized = await handleImageResize(modalData.imageFile);
+      formData.append("image", resized, modalData.imageFile.name);
     }
 
     const url = isEditing
       ? "http://localhost:5000/api/ProjectsBlob/UpdateProject"
       : "http://localhost:5000/api/ProjectsBlob/AddProject";
 
-    const method = isEditing ? "PUT" : "POST";
-
     try {
-      const response = await fetch(url, {
-        method,
+      const response = await authFetch(url, {
+        method: isEditing ? "PUT" : "POST",
         body: formData,
       });
-
       if (response.ok) {
         fetchProjects();
         setShowModal(false);
       } else {
         console.error("Failed to save project");
       }
-    } catch (error) {
-      console.error("Error saving project:", error);
+    } catch (err) {
+      console.error("Error saving project:", err);
     }
   };
 
-  const handleDelete = async (projectID) => {
+  const handleDelete = async (ProjectID) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/ProjectsBlob/DeleteProject/${projectID}`,
+      const response = await authFetch(
+        `http://localhost:5000/api/ProjectsBlob/DeleteProject/${ProjectID}`,
         { method: "DELETE" }
       );
-
       if (response.ok) {
         fetchProjects();
       } else {
@@ -152,14 +129,14 @@ const Projects = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="mt-4">
       <Button
         className="mb-3"
         onClick={() => {
           setModalData({
-            projectID: null,
-            projectName: "",
-            description: "",
+            ProjectID: null,
+            ProjectName: "",
+            Description: "",
             imageFile: null,
           });
           setIsEditing(false);
@@ -171,43 +148,37 @@ const Projects = () => {
 
       {loading ? (
         <p>Loading...</p>
+      ) : projects.length === 0 ? (
+        <p>No projects found.</p>
       ) : (
         projects.map((project) => (
-          <Card key={project.projectID} className="mb-4">
+          <Card key={project.ProjectID} className="mb-4">
             <Card.Header>
               <div className="d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
-                  {project.image && (
+                  {project.Image && (
                     <img
-                      src={`data:image/jpeg;base64,${project.image}`}
-                      alt={project.projectName}
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        marginRight: "15px",
-                        borderRadius: "5px",
-                      }}
+                      src={`data:image/jpeg;base64,${project.Image}`}
+                      alt={project.ProjectName}
+                      style={{ width: "80px", height: "80px", marginRight: "15px", borderRadius: "5px" }}
                     />
                   )}
                   <div>
-                    <h5>{project.projectName}</h5>
-                    <p>{project.description}</p>
+                    <h5>{project.ProjectName}</h5>
+                    <p>{project.Description}</p>
                   </div>
                 </div>
                 <div className="d-flex flex-column align-items-end">
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={<Tooltip>Edit</Tooltip>}
-                  >
+                  <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
                     <Button
                       variant="warning"
                       size="sm"
                       className="mb-2"
                       onClick={() => {
                         setModalData({
-                          projectID: project.projectID,
-                          projectName: project.projectName,
-                          description: project.description,
+                          ProjectID: project.ProjectID,
+                          ProjectName: project.ProjectName,
+                          Description: project.Description,
                           imageFile: null,
                         });
                         setIsEditing(true);
@@ -217,14 +188,11 @@ const Projects = () => {
                       <i className="fas fa-pencil-alt"></i>
                     </Button>
                   </OverlayTrigger>
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={<Tooltip>Delete Project</Tooltip>}
-                  >
+                  <OverlayTrigger placement="top" overlay={<Tooltip>Delete Project</Tooltip>}>
                     <Button
                       variant="danger"
                       size="sm"
-                      onClick={() => handleDelete(project.projectID)}
+                      onClick={() => handleDelete(project.ProjectID)}
                     >
                       <i className="fas fa-trash"></i>
                     </Button>
@@ -233,10 +201,12 @@ const Projects = () => {
               </div>
             </Card.Header>
             <Card.Body>
-              <ProjectItems
-                projectID={project.projectID}
-                availableItems={availableItems}
-              />
+              {project.ProjectID && (
+                <ProjectItems
+                  ProjectID={project.ProjectID}
+                  availableItems={availableItems}
+                />
+              )}
             </Card.Body>
           </Card>
         ))
@@ -252,9 +222,9 @@ const Projects = () => {
               <Form.Label>Project Name</Form.Label>
               <Form.Control
                 type="text"
-                value={modalData.projectName}
+                value={modalData.ProjectName}
                 onChange={(e) =>
-                  setModalData({ ...modalData, projectName: e.target.value })
+                  setModalData({ ...modalData, ProjectName: e.target.value })
                 }
               />
             </Form.Group>
@@ -262,9 +232,9 @@ const Projects = () => {
               <Form.Label>Description</Form.Label>
               <Form.Control
                 as="textarea"
-                value={modalData.description}
+                value={modalData.Description}
                 onChange={(e) =>
-                  setModalData({ ...modalData, description: e.target.value })
+                  setModalData({ ...modalData, Description: e.target.value })
                 }
               />
             </Form.Group>
@@ -274,10 +244,7 @@ const Projects = () => {
                 type="file"
                 onChange={(e) => {
                   if (e.target.files[0]) {
-                    setModalData({
-                      ...modalData,
-                      imageFile: e.target.files[0],
-                    });
+                    setModalData({ ...modalData, imageFile: e.target.files[0] });
                   }
                 }}
               />

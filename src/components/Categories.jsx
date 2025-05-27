@@ -1,23 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Table,
+  Modal,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
-
+import { authFetch } from "../utils/authFetch";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalData, setModalData] = useState({ categoryID: null, categoryName: "" });
+  const [modalData, setModalData] = useState({
+    CategoryID: null,
+    CategoryName: "",
+  });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState(null);
-  
-  
+  const [collapsed, setCollapsed] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
 
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/Items/GetCategories");
+      const response = await authFetch(
+        "http://localhost:5000/api/categories/GetCategories"
+      );
       if (!response.ok) throw new Error("Failed to fetch categories");
       const data = await response.json();
       setCategories(data);
@@ -30,30 +43,29 @@ const Categories = () => {
 
   const handleSave = async () => {
     const url = isEditing
-      ? `http://localhost:5000/api/Items/UpdateCategory`
-      : `http://localhost:5000/api/Items/AddCategory`;
+      ? `http://localhost:5000/api/categories/UpdateCategory`
+      : `http://localhost:5000/api/categories/AddCategory`;
 
     const method = isEditing ? "PUT" : "POST";
 
     try {
       const payload = isEditing
-        ? modalData // Include categoryID for update
-        : { categoryName: modalData.categoryName }; // Only send categoryName for add
+        ? modalData // Include CategoryID for update
+        : { CategoryName: modalData.CategoryName }; // Only send CategoryName for add
 
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method: method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error || "Failed to save category.");
+        throw new Error(error || "Failed to save Category.");
       }
 
       fetchCategories(); // Refresh categories
     } catch (error) {
-      console.error("Error saving category:", error);
+      console.error("Error saving Category:", error);
     } finally {
       setShowModal(false);
     }
@@ -61,18 +73,21 @@ const Categories = () => {
 
   const handleDelete = async () => {
     if (!selectedForDelete) return;
-  
+
     try {
-      await fetch(`http://localhost:5000/api/Items/DeleteCategory/${selectedForDelete.categoryID}`, {
-        method: "DELETE",
-      });
+      await authFetch(
+        `http://localhost:5000/api/categories/DeleteCategory/${selectedForDelete.CategoryID}`,
+        {
+          method: "DELETE",
+        }
+      );
       fetchCategories();
     } catch (error) {
-        console.error("Error deleting item:", error);
-      } finally {
-        setShowDeleteModal(false);
-        setSelectedForDelete(null);
-      }
+      console.error("Error deleting item:", error);
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedForDelete(null);
+    }
   };
 
   useEffect(() => {
@@ -80,82 +95,94 @@ const Categories = () => {
   }, []);
 
   return (
-    <div className="container mt-4">
+       <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h4>Categories</h4>
-          <Button
-            onClick={() => {
-              setModalData({ categoryID: null, categoryName: "" });
-              setIsEditing(false);
-              setShowModal(true);
-            }}
-          >
-            Add Category
-          </Button>
+          <h4 className="mb-0">Categories</h4>
+          <div className="d-flex gap-2">
+        
+            <Button
+              onClick={() => {
+                setModalData({ CategoryID: null, CategoryName: "" });
+                setIsEditing(false);
+                setShowModal(true);
+              }}
+            >
+              Add Category
+            </Button>
+                <Button
+              variant="outline-secondary"
+              style={{ backgroundColor: "transparent", borderColor: "#6c757d" }}
+              onClick={() => setCollapsed((prev) => !prev)}
+            >
+              <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`} style={{ color: "#6c757d" }}></i>
+            </Button>
+          </div>
         </Card.Header>
-        <Card.Body>
-          <Table bordered>
-            <thead className="thead-dark">
-              <tr>
-                <th>Category ID</th>
-                <th>Category Name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map((category) => (
-                <tr key={category.categoryID}>
-                  <td>{category.categoryID}</td>
-                  <td>{category.categoryName}</td>
 
-                  <td className="d-flex justify-content-end gap-2">
-                    <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        onClick={() => {
-                          setModalData(category);
-                          setIsEditing(true);
-                          setShowModal(true);
-                        }}
-                      >
-                        <i className="fas fa-pencil-alt"></i>
-                      </Button>
-                    </OverlayTrigger>
-                    <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
-                  <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedForDelete(category); // Set the selected item for delete
-                                  setShowDeleteModal(true); // Show the confirmation modal
-                                }}
-                              >
-                        <i className="fas fa-trash"></i>
-                      </Button>
-                    </OverlayTrigger>
-                  </td>
-
+        {!collapsed && (
+          <Card.Body>
+            <Table bordered>
+              <thead className="thead-dark">
+                <tr>
+                  <th>Category ID</th>
+                  <th>Category Name</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+              </thead>
+              <tbody>
+                {categories.map((Category) => (
+                  <tr key={Category.CategoryID}>
+                    <td>{Category.CategoryID}</td>
+                    <td>{Category.CategoryName}</td>
+                    <td className="d-flex justify-content-end gap-2">
+                      <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => {
+                            setModalData(Category);
+                            setIsEditing(true);
+                            setShowModal(true);
+                          }}
+                        >
+                          <i className="fas fa-pencil-alt"></i>
+                        </Button>
+                      </OverlayTrigger>
+                      <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedForDelete(Category);
+                            setShowDeleteModal(true);
+                          }}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </OverlayTrigger>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card.Body>
+        )}
       </Card>
-
       <ConfirmationModal
-  show={showDeleteModal}
-  onHide={() => setShowDeleteModal(false)}
-  onConfirm={handleDelete}
-  title="Confirm Deletion"
-  message={`Are you sure you want to delete ${selectedForDelete?.categoryName}?`}
-/>
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete ${selectedForDelete?.CategoryName}?`}
+      />
 
       {/* Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Category" : "Add Category"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Category" : "Add Category"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -163,10 +190,10 @@ const Categories = () => {
               <Form.Label>Category Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter category name"
-                value={modalData.categoryName}
+                placeholder="Enter Category name"
+                value={modalData.CategoryName}
                 onChange={(e) =>
-                  setModalData({ ...modalData, categoryName: e.target.value })
+                  setModalData({ ...modalData, CategoryName: e.target.value })
                 }
               />
             </Form.Group>

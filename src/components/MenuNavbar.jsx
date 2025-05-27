@@ -1,49 +1,80 @@
-import React, { useContext } from 'react';
-import { Navbar, Nav, Dropdown } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { LanguageContext } from './LanguageProvider';
-import { useTranslation } from 'react-i18next'; // Import useTranslation hook
+import React, { useContext } from "react";
+import { Navbar, Nav, Dropdown } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import { LanguageContext } from "./LanguageProvider";
+import { useTranslation } from "react-i18next";
 
 const MenuNavbar = () => {
-    const { language, changeLanguage } = useContext(LanguageContext); // Access language and function to change it
-    const { t } = useTranslation(); // Use the translation hook
+  const { language, changeLanguage } = useContext(LanguageContext);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
 
-    return (
-        <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
-            <Navbar.Brand as={Link} to="/">{t('menu.brand')}</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="me-auto">
-                    <Nav.Link as={Link} to="/items">
-                        <i className="bi bi-box-seam"></i> {t('menu.items')}
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/categories">
-                        <i className="bi bi-tags"></i> {t('menu.categories')}
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/locations">
-                        <i className="bi bi-geo-alt"></i> {t('menu.locations')}
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/containers">
-                        <i className="bi bi-basket"></i> {t('menu.containers')}
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/projects">
-                        <i className="bi bi-folder"></i> {t('menu.projects')}
-                    </Nav.Link>
-                </Nav>
-                <Dropdown align="end">
-                    <Dropdown.Toggle variant="outline-light" id="dropdown-language-selector">
-                        {language === 'en' ? 'English' : language === 'es' ? 'Español' : t(`languages.${language}`)}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                        <Dropdown.Item onClick={() => changeLanguage('en')}>English</Dropdown.Item>
-                        <Dropdown.Item onClick={() => changeLanguage('es')}>Español</Dropdown.Item>
-                        <Dropdown.Item onClick={() => changeLanguage('ro')}>Română</Dropdown.Item>
-                        <Dropdown.Item onClick={() => changeLanguage('fr')}>Français</Dropdown.Item>
-                    </Dropdown.Menu>
-                </Dropdown>
-            </Navbar.Collapse>
-        </Navbar>
-    );
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const username = localStorage.getItem("username") || "Guest";
+
+  return (
+    <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 px-3">
+      <Navbar.Brand as={Link} to="/">
+        {t("menu.brand")}
+      </Navbar.Brand>
+      <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar.Collapse id="basic-navbar-nav">
+        <Nav className="me-auto">
+          {isLoggedIn && (
+            <>
+              <Nav.Link as={Link} to="/projects">
+                <i className="bi bi-folder"></i> {t("menu.projects")}
+              </Nav.Link>
+              <Nav.Link as={Link} to="/storage">
+                <i className="bi bi-geo-alt"></i> {t("menu.storage")}
+              </Nav.Link>
+              <Nav.Link as={Link} to="/inventory">
+                <i className="bi bi-layout-text-window-reverse"></i>{" "}
+                {t("menu.inventory")}
+              </Nav.Link>
+            </>
+          )}
+        </Nav>
+
+        <Nav>
+          <Dropdown align="end">
+            <Dropdown.Toggle variant="outline-light" id="settings-dropdown">
+              <i className="bi bi-gear"></i>{" "}
+              {isLoggedIn ? username : t("menu.login")}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {isLoggedIn ? (
+                <>
+                  <Dropdown.Item onClick={handleLogout}>
+                    <i className="bi bi-box-arrow-right me-2"></i>
+                    {t("menu.logout")}
+                  </Dropdown.Item>
+                </>
+              ) : (
+                <Dropdown.Item as={Link} to="/login">
+                  <i className="bi bi-box-arrow-in-right me-2"></i>
+                  {t("menu.login")}
+                </Dropdown.Item>
+              )}
+              <Dropdown.Divider />
+              <Dropdown.Header>{t("menu.language")}</Dropdown.Header>
+              <Dropdown.Item onClick={() => changeLanguage("en")}>English</Dropdown.Item>
+              <Dropdown.Item onClick={() => changeLanguage("es")}>Español</Dropdown.Item>
+              <Dropdown.Item onClick={() => changeLanguage("ro")}>Română</Dropdown.Item>
+              <Dropdown.Item onClick={() => changeLanguage("fr")}>Français</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </Nav>
+      </Navbar.Collapse>
+    </Navbar>
+  );
 };
 
 export default MenuNavbar;
