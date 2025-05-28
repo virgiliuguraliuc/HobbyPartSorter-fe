@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, Table, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
+import { getApiBaseUrl } from "../utils/config";
 
 const Containers = () => {
   const [containers, setContainers] = useState([]);
@@ -22,7 +23,7 @@ const Containers = () => {
   const fetchContainers = async () => {
     setLoading(true);
     try {
-      const response = await authFetch("http://localhost:5000/api/containers/GetContainers");
+      const response = await authFetch(`${getApiBaseUrl()}/api/containers/GetContainers`);
       const data = await response.json();
       setContainers(data);
     } catch (error) {
@@ -34,7 +35,7 @@ const Containers = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await authFetch("http://localhost:5000/api/locations/GetLocations");
+      const response = await authFetch(`${getApiBaseUrl()}/api/locations/GetLocations`);
       const data = await response.json();
       setLocations(data);
     } catch (error) {
@@ -89,8 +90,8 @@ const Containers = () => {
     }
 
     const url = isEditing
-      ? "http://localhost:5000/api/containers/UpdateContainer"
-      : "http://localhost:5000/api/containers/AddContainer";
+      ? `${getApiBaseUrl()}/api/containers/UpdateContainer`
+      : `${getApiBaseUrl()}/api/containers/AddContainer`;
 
     const method = isEditing ? "PUT" : "POST";
 
@@ -110,7 +111,7 @@ const Containers = () => {
   const handleDelete = async () => {
     if (!selectedForDelete) return;
     try {
-      await authFetch(`http://localhost:5000/api/containers/DeleteContainer/${selectedForDelete.ContainerID}`, {
+      await authFetch(`${getApiBaseUrl()}/api/containers/DeleteContainer/${selectedForDelete.ContainerID}`, {
         method: "DELETE",
       });
       fetchContainers();
@@ -136,7 +137,7 @@ const Containers = () => {
     <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h4>Containers</h4>
+          <h5>Containers</h5>
           <Button onClick={() => {
             setModalData({
               ContainerID: null,
@@ -152,7 +153,7 @@ const Containers = () => {
           </Button>
         </Card.Header>
         <Card.Body>
-          <Table bordered>
+          <Table bordered size="sm" responsive>
             <thead>
               <tr>
                 <th>Image</th>

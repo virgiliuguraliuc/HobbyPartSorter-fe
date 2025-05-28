@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Table, Modal, Form } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
+import { getApiBaseUrl } from "../utils/config";
 
 const ProjectItems = ({ ProjectID, availableItems }) => {
   const [items, setItems] = useState([]);
@@ -19,7 +20,7 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
   const fetchProjectItems = async () => {
     try {
       const response = await authFetch(
-        `http://localhost:5000/api/ProjectsBlob/GetProjectItems/${ProjectID}`
+        `${getApiBaseUrl()}/api/ProjectsBlob/GetProjectItems/${ProjectID}`
       );
       const data = await response.json();
       setItems(Array.isArray(data) ? data : []);
@@ -37,8 +38,8 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
     };
 
     const url = isEditing
-      ? "http://localhost:5000/api/ProjectsBlob/UpdateProjectItem"
-      : "http://localhost:5000/api/ProjectsBlob/AddProjectItem";
+      ? `${getApiBaseUrl()}/api/ProjectsBlob/UpdateProjectItem`
+      : `${getApiBaseUrl()}/api/ProjectsBlob/AddProjectItem`;
 
     const method = isEditing ? "PUT" : "POST";
 
@@ -65,7 +66,7 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
 
     try {
       const response = await authFetch(
-        `http://localhost:5000/api/ProjectsBlob/DeleteProjectItem/${selectedForDelete.ProjectItemID}`,
+        `${getApiBaseUrl()}/api/ProjectsBlob/DeleteProjectItem/${selectedForDelete.ProjectItemID}`,
         { method: "DELETE" }
       );
 

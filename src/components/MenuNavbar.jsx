@@ -52,6 +52,10 @@ const MenuNavbar = () => {
             <Dropdown.Menu>
               {isLoggedIn ? (
                 <>
+                 <Dropdown.Item as={Link} to="/settings">
+                    <i className="bi bi-sliders me-2"></i>
+                    {t("menu.settings", "Settings")}
+                  </Dropdown.Item>
                   <Dropdown.Item onClick={handleLogout}>
                     <i className="bi bi-box-arrow-right me-2"></i>
                     {t("menu.logout")}

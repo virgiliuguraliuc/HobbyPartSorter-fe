@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { getApiBaseUrl } from '../utils/config';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -12,7 +13,7 @@ const ForgotPassword = () => {
         setError('');
         setMessage('');
         try {
-            const response = await axios.post('http://localhost:5000/forgot-password', { email });
+            const response = await axios.post(`${getApiBaseUrl()}/forgot-password`, { email });
             setMessage(response.data.message);
         } catch (err) {
             setError(err.response?.data?.detail || 'Error sending reset instructions');

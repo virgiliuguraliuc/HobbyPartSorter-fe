@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
+import { getApiBaseUrl } from "../utils/config";
 
 const ItemsList = () => {
   const [items, setItems] = useState([]);
@@ -77,7 +78,7 @@ const ItemsList = () => {
     setLoading(true);
     try {
       const response = await authFetch(
-        "http://localhost:5000/api/ItemsBlob/GetItems"
+        `${getApiBaseUrl()}/api/ItemsBlob/GetItems`
       );
       const data = await response.json();
       setItems(data);
@@ -91,7 +92,7 @@ const ItemsList = () => {
   const fetchCategories = async () => {
     try {
       const response = await authFetch(
-        "http://localhost:5000/api/ItemsBlob/GetCategories"
+        `${getApiBaseUrl()}/api/ItemsBlob/GetCategories`
       );
       const data = await response.json();
       setCategories(data);
@@ -149,8 +150,8 @@ const ItemsList = () => {
   // Save item (add or update)
   const handleSave = async () => {
     const url = isEditing
-      ? "http://localhost:5000/api/ItemsBlob/UpdateItem"
-      : "http://localhost:5000/api/ItemsBlob/AddItem";
+      ? `${getApiBaseUrl()}/api/ItemsBlob/UpdateItem`
+      : `${getApiBaseUrl()}api/ItemsBlob/AddItem`;
     const method = isEditing ? "POST" : "POST";
 
     try {
@@ -196,7 +197,7 @@ const ItemsList = () => {
 
     try {
       await authFetch(
-        `http://localhost:5000/api/ItemsBlob/DeleteItem/${selectedForDelete.ItemID}`,
+        `${getApiBaseUrl()}/api/ItemsBlob/DeleteItem/${selectedForDelete.ItemID}`,
         {
           method: "DELETE",
         }
@@ -227,9 +228,27 @@ const ItemsList = () => {
     <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h4>Items</h4>
+          <h5>Items</h5>
           <div className="d-flex gap-2">
-            <Button variant="primary">Add Item</Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                setModalData({
+                  itemID: null,
+                  ItemName: "",
+                  CategoryID: categories[0]?.CategoryID || "",
+                  Weight: "",
+                  Price: "",
+                  Quantity: "",
+                  Description: "",
+                  ImageFile: null,
+                });
+                setIsEditing(false);
+                setShowModal(true);
+              }}
+            >
+              Add Item
+            </Button>
             <Button
               variant="outline-secondary"
               style={{ backgroundColor: "transparent", borderColor: "#6c757d" }}
@@ -357,18 +376,18 @@ const ItemsList = () => {
                     return (
                       <tr key={item.itemID}>
                         <td>
-                            <div className="text-end">
-                          {item.Image && (
-                            <img
-                              src={`data:Image/png;base64,${item.Image}`}
-                              alt={item.ItemName}
-                              style={{
-                                width: "50px",
-                                height: "50px",
-                                objectFit: "cover",
-                              }}
-                            />
-                          )}
+                          <div className="text-end">
+                            {item.Image && (
+                              <img
+                                src={`data:Image/png;base64,${item.Image}`}
+                                alt={item.ItemName}
+                                style={{
+                                  width: "50px",
+                                  height: "50px",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            )}
                           </div>
                         </td>
                         <td>
@@ -377,34 +396,28 @@ const ItemsList = () => {
                         </td>
                         <td>
                           <div
-                            className="text-muted text-truncate"
-                            style={{ maxWidth: 150, whiteSpace: "nowrap" }}
+                            className=" text-end "
+                            style={{ whiteSpace: "wrap" }}
                           >
-                            <div className="text-end"> 
-                            {expandedRows[item.itemID]
-                              ? item.Description
-                              : "..."}
-                              </div>
+                            <div className="text-end">
+                              {expandedRows[item.itemID]
+                                ? item.Description
+                                : "..."}
+                            </div>
                           </div>
                         </td>
                         <td>
                           <div className="text-end">{item.Weight} kg </div>
                         </td>
                         <td>
-                          <div className="text-end">
-                          {item.Price} $
-                          </div>
+                          <div className="text-end">{item.Price} $</div>
                         </td>
                         <td>
-                          <div className="text-end">
-                          {categoryName}
-                          </div>
-                          </td>
+                          <div className="text-end">{categoryName}</div>
+                        </td>
                         <td>
-                          <div className="text-end">
-                          {item.Quantity}
-                          </div>
-                          </td>
+                          <div className="text-end">{item.Quantity}</div>
+                        </td>
                         <td className="text-end">
                           <div className="d-flex justify-content-end gap-2">
                             <OverlayTrigger
@@ -416,7 +429,7 @@ const ItemsList = () => {
                                 size="sm"
                                 onClick={() => {
                                   setModalData({
-                                    itemID: item.itemID,
+                                    itemID: item.ItemID,
                                     ItemName: item.ItemName,
                                     CategoryID: item.CategoryID,
                                     Weight: item.Weight,

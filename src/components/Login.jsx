@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { getApiBaseUrl } from '../utils/config';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -13,12 +14,13 @@ const Login = () => {
         e.preventDefault();
         setError('');
         try {
-            const response = await axios.post('http://localhost:5000/login', new URLSearchParams({
+            const response = await axios.post(`${getApiBaseUrl()}/login`, new URLSearchParams({
                 username,
                 password
             }));
             localStorage.setItem('token', response.data.access_token);
-            navigate('/items');
+            // navigam la root / home
+            navigate('/');
         } catch (err) {
             setError('Invalid username or password');
         }

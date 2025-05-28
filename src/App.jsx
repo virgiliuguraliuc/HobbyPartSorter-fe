@@ -10,13 +10,17 @@ import Login from './components/Login';
 import Register from './components/Register';
 import InventoryOverview from './components/InventoryOverview';
 import Storage from './components/Storage';
+import Home from './components/Home';
+import Settings from './components/Settings';
 import ForgotPassword from './components/ForgotPassword';
 import LanguageProvider from './components/LanguageProvider'; // Import the LanguageProvider
+import { ThemeProvider } from './contexts/ThemeContext';
 
 //ADAUGA CEVA P/ YEP AI UITAT
 const App = () => {
     return (
         <LanguageProvider>
+              <ThemeProvider>
             <Router>
                 <MenuNavbar />
                 <div className="container">
@@ -32,7 +36,8 @@ const App = () => {
                         <Route path="/locations" element={<Locations />} />
                         <Route path="/containers" element={<Containers />} />
                         <Route path="/projects" element={<Projects />} />
-                        <Route path="/" element={<h1>Welcome to Hobby Part Tracker</h1>} />
+                        <Route path="/" element={<Home />} />
+                        <Route path="/settings" element={<Settings />} />
                     </Routes>
                 </div>
                   <div className="floating-cogs">
@@ -42,6 +47,7 @@ const App = () => {
         <i className="bi bi-gear-fill cog"></i>
       </div>
             </Router>
+            </ThemeProvider>
         </LanguageProvider>
     );
 };

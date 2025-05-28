@@ -6,7 +6,7 @@ export const authFetch = (url, options = {}) => {
     Authorization: `Bearer ${token}`,
   };
 
-  // ⛔ Do not set Content-Type if body is FormData
+  // Do not set Content-Type if body is FormData
   if (!(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }

@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
+import { getApiBaseUrl } from "../utils/config";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -29,7 +30,7 @@ const Categories = () => {
     setLoading(true);
     try {
       const response = await authFetch(
-        "http://localhost:5000/api/categories/GetCategories"
+        `${getApiBaseUrl()}/api/categories/GetCategories`
       );
       if (!response.ok) throw new Error("Failed to fetch categories");
       const data = await response.json();
@@ -43,8 +44,8 @@ const Categories = () => {
 
   const handleSave = async () => {
     const url = isEditing
-      ? `http://localhost:5000/api/categories/UpdateCategory`
-      : `http://localhost:5000/api/categories/AddCategory`;
+      ? `${getApiBaseUrl()}/api/categories/UpdateCategory`
+      : `${getApiBaseUrl()}/api/categories/AddCategory`;
 
     const method = isEditing ? "PUT" : "POST";
 
@@ -76,7 +77,7 @@ const Categories = () => {
 
     try {
       await authFetch(
-        `http://localhost:5000/api/categories/DeleteCategory/${selectedForDelete.CategoryID}`,
+        `${getApiBaseUrl()}/api/categories/DeleteCategory/${selectedForDelete.CategoryID}`,
         {
           method: "DELETE",
         }
@@ -98,7 +99,7 @@ const Categories = () => {
        <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h4 className="mb-0">Categories</h4>
+          <h5 className="mb-0">Categories</h5>
           <div className="d-flex gap-2">
         
             <Button
@@ -122,7 +123,7 @@ const Categories = () => {
 
         {!collapsed && (
           <Card.Body>
-            <Table bordered>
+            <Table bordered size="sm" responsive>
               <thead className="thead-dark">
                 <tr>
                   <th>Category ID</th>

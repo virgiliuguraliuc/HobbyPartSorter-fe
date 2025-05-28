@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import ProjectItems from "./ProjectItems";
 import { authFetch } from "../utils/authFetch";
+import { getApiBaseUrl } from "../utils/config";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -19,7 +20,7 @@ const Projects = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await authFetch("http://localhost:5000/api/ProjectsBlob/GetProjects");
+      const response = await authFetch(`${getApiBaseUrl()}/api/ProjectsBlob/GetProjects`);
       const data = await response.json();
       setProjects(data || []);
     } catch (error) {
@@ -31,8 +32,7 @@ const Projects = () => {
 
 const fetchAvailableItems = async () => {
   try {
-    const response = await authFetch("http://localhost:5000/api/UserItemsBlob/GetUserItems"); // <-- New route
-    const data = await response.json();
+    const response = await authFetch(`${getApiBaseUrl()}api/UserItemsBlob/GetUserItems`); 
     setAvailableItems(data || []);
   } catch (error) {
     console.error("Error loading user items:", error);
@@ -93,8 +93,8 @@ const fetchAvailableItems = async () => {
     }
 
     const url = isEditing
-      ? "http://localhost:5000/api/ProjectsBlob/UpdateProject"
-      : "http://localhost:5000/api/ProjectsBlob/AddProject";
+      ? `${getApiBaseUrl()}/api/ProjectsBlob/UpdateProject`
+      : `${getApiBaseUrl()}/api/ProjectsBlob/AddProject`;
 
     try {
       const response = await authFetch(url, {
@@ -115,7 +115,7 @@ const fetchAvailableItems = async () => {
   const handleDelete = async (ProjectID) => {
     try {
       const response = await authFetch(
-        `http://localhost:5000/api/ProjectsBlob/DeleteProject/${ProjectID}`,
+        `${getApiBaseUrl()}/api/ProjectsBlob/DeleteProject/${ProjectID}`,
         { method: "DELETE" }
       );
       if (response.ok) {

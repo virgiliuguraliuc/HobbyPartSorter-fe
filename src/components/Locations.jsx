@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
+import { getApiBaseUrl } from "../utils/config";
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -29,7 +30,7 @@ const Locations = () => {
     setLoading(true);
     try {
       const response = await authFetch(
-        "http://localhost:5000/api/locations/GetLocations"
+        `${getApiBaseUrl()}/api/locations/GetLocations`
       );
       if (!response.ok) throw new Error("Failed to fetch locations");
       const data = await response.json();
@@ -43,8 +44,8 @@ const Locations = () => {
 
   const handleSave = async () => {
     const url = isEditing
-      ? "http://localhost:5000/api/locations/UpdateLocation"
-      : "http://localhost:5000/api/locations/AddLocation";
+      ? `${getApiBaseUrl()}/api/locations/UpdateLocation`
+      : `${getApiBaseUrl()}/api/locations/AddLocation`;
     const method = isEditing ? "PUT" : "POST";
 
     try {
@@ -68,7 +69,7 @@ const Locations = () => {
   const handleDelete = async () => {
     try {
       const response = await authFetch(
-        `http://localhost:5000/api/locations/DeleteLocation/${selectedForDelete.LocationID}`,
+        `${getApiBaseUrl()}/api/locations/DeleteLocation/${selectedForDelete.LocationID}`,
         { method: "DELETE" }
       );
 
@@ -91,7 +92,7 @@ const Locations = () => {
   return (
     <div className="mt-4">
       <Card>
-        <Card.Header as="h2" className="d-flex justify-content-between align-items-center">
+        <Card.Header as="h5" className="d-flex justify-content-between align-items-center">
           <span>Locations</span>
           <Button
             variant="primary"
@@ -105,7 +106,7 @@ const Locations = () => {
           </Button>
         </Card.Header>
         <Card.Body>
-          <Table bordered>
+          <Table bordered size="sm" responsive> 
             <thead>
               <tr>
                 <th>Name</th>

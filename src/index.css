@@ -1,16 +1,29 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* ===== LIGHT THEME ===== */
+:root[data-theme="light"] {
+  --bg-body: linear-gradient(-45deg, #76a1ac, #3f5877, #73d8ef, #435a7b);
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --text-color: #000000;
+  --table-bg: rgba(255, 255, 255, 0.85);
+  --table-text: #000000;
+  --table-border: #dee2e6;
+  --btn-bg: #1a1a1a;
+  --btn-text: #ffffff;
+  --btn-border: #646cff;
+  --btn-hover-border: #535bf2;
+}
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ===== DARK THEME ===== */
+:root[data-theme="dark"] {
+  --bg-body: linear-gradient(-45deg, #1c1e26, #252a33, #1f2631, #2c3b51);
+  --bg-card: rgba(30, 30, 30, 1);
+  --text-color: #f0f0f0;
+  --table-bg: rgba(30, 30, 30, 0.85);
+  --table-text:#f9f9f9;
+  --table-border: #444;
+  --btn-bg: #333333;
+  --btn-text: #f9f9f9;
+  --btn-border: #888;
+  --btn-hover-border: #aaa;
 }
 
 body {
@@ -22,6 +35,7 @@ body {
   background: linear-gradient(-45deg, #76a1ac, #3f5877, #73d8ef, #435a7b);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
+   color: var(--text-color);
 }
 
 @keyframes gradientShift {
@@ -56,24 +70,88 @@ h1 {
   line-height: 1.1;
 }
 
+th {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+}
+
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--btn-border);
   padding: 0.6em 1.2em;
+    color: var(--btn-text);
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--btn-bg);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--btn-hover-border);
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+.card {
+  /* padding: 2em; */
+  background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.table,
+.table tbody,
+.table thead,
+.table tfoot,
+.table-striped > tbody > tr:nth-of-type(odd),
+.table-hover > tbody > tr:hover {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+}
+
+/* Table headers and cells */
+.table th,
+.table td {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+  border-color: var(--table-border) !important;
+    border-width: 1px;
+  border-style: solid;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Optional: lighter hover for contrast */
+.table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
+}
+
+.modal-content {
+  background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
+}
+
+.btn {
+  background-color: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  border-color: var(--btn-border) !important;
+}
+
+.btn:hover {
+  border-color: var(--btn-hover-border) !important;
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {

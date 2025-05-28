@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { getApiBaseUrl } from '../utils/config';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Register = () => {
         setError('');
         setSuccess('');
         try {
-            await axios.post('http://localhost:5000/register', form);
+            await axios.post(`${getApiBaseUrl()}/register`, form);
             setSuccess('User registered successfully. You can now login.');
             setTimeout(() => navigate('/login'), 1500);
         } catch (err) {
