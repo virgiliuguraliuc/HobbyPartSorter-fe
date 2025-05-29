@@ -20,7 +20,8 @@ const MenuNavbar = () => {
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="mb-4 px-3">
-      <Navbar.Brand as={Link} to="/">
+      <Navbar.Brand  as={Link} to="/">
+        <i className="bi bi-house-door me-2"></i>
         {t("menu.brand")}
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />

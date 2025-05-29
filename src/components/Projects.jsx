@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Button, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import ProjectItems from "./ProjectItems";
+import Notes from "./Notes";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
 
@@ -32,14 +33,13 @@ const Projects = () => {
 
 const fetchAvailableItems = async () => {
   try {
-    const response = await authFetch(`${getApiBaseUrl()}api/UserItemsBlob/GetUserItems`); 
+    const response = await authFetch(`${getApiBaseUrl()}/api/UserItemsBlob/GetUserItems`); 
+     const data = await response.json(); 
     setAvailableItems(data || []);
   } catch (error) {
     console.error("Error loading user items:", error);
   }
 };
-
-
 
   useEffect(() => {
     fetchProjects();
@@ -207,6 +207,9 @@ const fetchAvailableItems = async () => {
                   availableItems={availableItems}
                 />
               )}
+              <div className="mt-3">
+                <Notes key={project.ProjectID} projectID={project.ProjectID} />
+              </div>
             </Card.Body>
           </Card>
         ))

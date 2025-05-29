@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Card, Button } from "react-bootstrap";
 import { getAiBaseUrl } from "../utils/config";
 import { getApiBaseUrl } from "../utils/config";
+import Notes from "./Notes";
+import Summary from "./Summary";
 
 const Home = () => {
   const [collapsed, setCollapsed] = useState({
@@ -33,6 +35,7 @@ const Home = () => {
         {!collapsed.summary && (
           <Card.Body>
             <p>This section provides a quick overview of your inventory, stats, and recent changes.</p>
+            <Summary/>
           </Card.Body>
         )}
       </Card>
@@ -54,6 +57,7 @@ const Home = () => {
         {!collapsed.notes && (
           <Card.Body>
             <p>You can write down ideas, part numbers, or upcoming tasks here.</p>
+            <Notes/>
           </Card.Body>
         )}
       </Card>
