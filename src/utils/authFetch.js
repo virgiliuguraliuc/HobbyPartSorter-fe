@@ -1,4 +1,4 @@
-export const authFetch = (url, options = {}) => {
+export const authFetch = async (url, options = {}) => {
   const token = localStorage.getItem("token");
 
   const headers = {
@@ -11,8 +11,17 @@ export const authFetch = (url, options = {}) => {
     headers["Content-Type"] = "application/json";
   }
 
-  return fetch(url, {
+  const response = await fetch(url, {
     ...options,
     headers,
   });
+
+  // Handle 403 Forbidden - redirect to login
+  if (response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    return new Promise(() => {}); // Halt execution
+  }
+
+  return response;
 };
