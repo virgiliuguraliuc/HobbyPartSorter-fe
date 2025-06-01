@@ -171,7 +171,7 @@ const Summary = () => {
                 <ul className="ms-3">
                   {loc.containers.map((cont) => (
                     <li key={cont.ContainerID}>
-                      <i className="bi bi-box-fill me-1 text-primary"></i>
+                      <i className="bi bi-box-seam me-2 text-secondary"></i>
                       <strong>{cont.ContainerName}</strong>:{" "}
                       <Badge className="me-2">{cont.itemCount} items</Badge>
                       <Badge className="me-2">{cont.totalWeight.toFixed(2)} g</Badge>

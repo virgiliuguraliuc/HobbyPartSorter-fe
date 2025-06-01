@@ -48,7 +48,9 @@ const Notes = ({ projectID = null }) => {
 
   const fetchProjects = async () => {
     try {
-      const res = await authFetch(`${getApiBaseUrl()}/api/ProjectsBlob/GetProjects`);
+      const res = await authFetch(
+        `${getApiBaseUrl()}/api/ProjectsBlob/GetProjects`
+      );
       if (!res.ok) throw new Error("Failed to fetch projects");
       setProjects(await res.json());
     } catch (err) {
@@ -128,7 +130,11 @@ const Notes = ({ projectID = null }) => {
               variant="outline-secondary"
               onClick={() => setCollapsed((prev) => !prev)}
             >
-              <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`}></i>
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+              ></i>
             </Button>
           </div>
         </Card.Header>
@@ -146,44 +152,56 @@ const Notes = ({ projectID = null }) => {
               </thead>
               <tbody>
                 {notes.map((note) => {
-                  const project = projects.find(p => p.ProjectID === note.ProjectID);
+                  const project = projects.find(
+                    (p) => p.ProjectID === note.ProjectID
+                  );
                   return (
                     <tr key={note.TaskID}>
                       <td>{note.Note}</td>
-                      {!projectID && <td>{project?.ProjectName || "Unknown"}</td>}
-                      <td>
+                      {!projectID && (
+                        <td>{project?.ProjectName || "Unknown"}</td>
+                      )}
+                      <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                         {note.Complete ? (
                           <i className="bi bi-check-circle-fill text-success"></i>
                         ) : (
                           <i className="bi bi-hourglass-split text-warning"></i>
                         )}
                       </td>
-                      <td className="d-flex justify-content-end gap-2">
-                        <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
-                          <Button
-                            variant="warning"
-                            size="sm"
-                            onClick={() => {
-                              setModalData(note);
-                              setIsEditing(true);
-                              setShowModal(true);
-                            }}
+                      <td style={{ width: "1%", whiteSpace: "nowrap" }}>
+                        <div className="d-flex justify-content-end gap-2">
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Edit</Tooltip>}
                           >
-                            <i className="fas fa-pencil-alt"></i>
-                          </Button>
-                        </OverlayTrigger>
-                        <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedForDelete(note);
-                              setShowDeleteModal(true);
-                            }}
+                            <Button
+                              variant="warning"
+                              size="sm"
+                              onClick={() => {
+                                setModalData(note);
+                                setIsEditing(true);
+                                setShowModal(true);
+                              }}
+                            >
+                              <i className="fas fa-pencil-alt"></i>
+                            </Button>
+                          </OverlayTrigger>
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Delete</Tooltip>}
                           >
-                            <i className="fas fa-trash"></i>
-                          </Button>
-                        </OverlayTrigger>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedForDelete(note);
+                                setShowDeleteModal(true);
+                              }}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </OverlayTrigger>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -214,7 +232,10 @@ const Notes = ({ projectID = null }) => {
                 <Form.Select
                   value={modalData.ProjectID}
                   onChange={(e) =>
-                    setModalData({ ...modalData, ProjectID: Number(e.target.value) })
+                    setModalData({
+                      ...modalData,
+                      ProjectID: Number(e.target.value),
+                    })
                   }
                 >
                   <option value="">Select a project</option>

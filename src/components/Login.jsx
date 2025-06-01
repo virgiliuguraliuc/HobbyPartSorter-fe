@@ -22,7 +22,13 @@ const Login = () => {
             // navigam la root / home
             navigate('/');
         } catch (err) {
-            setError('Invalid username or password');
+            if (err.code === "ERR_NETWORK" || err.message === "Network Error") {
+            navigate('/offline');
+        } else if (err.response?.status === 403) {
+            setError("Access denied.");
+        } else {
+            setError("Invalid username or password");
+        }
         }
     };
 

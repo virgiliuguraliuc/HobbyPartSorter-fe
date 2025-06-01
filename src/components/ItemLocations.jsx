@@ -8,11 +8,18 @@ const ItemLocations = () => {
   const [items, setItems] = useState([]);
   const [containers, setContainers] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [newLink, setNewLink] = useState({ ItemID: "", ContainerID: "", ItemLocationID: null });
+  const [newLink, setNewLink] = useState({
+    ItemID: "",
+    ContainerID: "",
+    ItemLocationID: null,
+  });
+  const [collapsed, setCollapsed] = useState(false);
 
   const fetchItemLocations = async () => {
     try {
-      const res = await authFetch(`${getApiBaseUrl()}/api/item_locations/GetItemLocations`);
+      const res = await authFetch(
+        `${getApiBaseUrl()}/api/item_locations/GetItemLocations`
+      );
       const data = await res.json();
       setItemLocations(data);
     } catch (err) {
@@ -32,7 +39,9 @@ const ItemLocations = () => {
 
   const fetchContainers = async () => {
     try {
-      const res = await authFetch(`${getApiBaseUrl()}/api/containers/GetContainers`);
+      const res = await authFetch(
+        `${getApiBaseUrl()}/api/containers/GetContainers`
+      );
       const data = await res.json();
       setContainers(data);
     } catch (err) {
@@ -51,16 +60,24 @@ const ItemLocations = () => {
 
       if (isEditing) {
         // delete old record before re-inserting
-        await authFetch(`${getApiBaseUrl()}/api/item_locations/DeleteItemLocation/${newLink.ItemLocationID}`, {
-          method: "DELETE",
-        });
+        await authFetch(
+          `${getApiBaseUrl()}/api/item_locations/DeleteItemLocation/${
+            newLink.ItemLocationID
+          }`,
+          {
+            method: "DELETE",
+          }
+        );
       }
 
-      const res = await authFetch(`${getApiBaseUrl()}/api/item_locations/AddItemLocation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await authFetch(
+        `${getApiBaseUrl()}/api/item_locations/AddItemLocation`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (res.ok) {
         fetchItemLocations();
@@ -76,9 +93,12 @@ const ItemLocations = () => {
 
   const handleDelete = async (id) => {
     try {
-      await authFetch(`${getApiBaseUrl()}/api/item_locations/DeleteItemLocation/${id}`, {
-        method: "DELETE",
-      });
+      await authFetch(
+        `${getApiBaseUrl()}/api/item_locations/DeleteItemLocation/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
       fetchItemLocations();
     } catch (err) {
       console.error("Delete failed", err);
@@ -91,70 +111,116 @@ const ItemLocations = () => {
     fetchContainers();
   }, []);
 
-  const getItemName = (id) => items.find((i) => i.ItemID === id)?.ItemName || "Unknown";
-  const getContainerName = (id) => containers.find((c) => c.ContainerID === id)?.ContainerName || "Unknown";
+  const getItemName = (id) =>
+    items.find((i) => i.ItemID === id)?.ItemName || "Unknown";
+  const getContainerName = (id) =>
+    containers.find((c) => c.ContainerID === id)?.ContainerName || "Unknown";
+  const getContainerImage = (containerID) =>
+    containers.find((c) => c.ContainerID === containerID)?.Image || null;
 
   return (
     <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5>Item Locations</h5>
-          <Button variant="primary" onClick={() => {
-            setNewLink({ ItemID: "", ContainerID: "", ItemLocationID: null });
-            setShowModal(true);
-          }}>
-            Add Item to Container
-          </Button>
+          <div className="d-flex gap-2">
+            <Button
+              variant="primary"
+              onClick={() => {
+                setNewLink({
+                  ItemID: "",
+                  ContainerID: "",
+                  ItemLocationID: null,
+                });
+                setShowModal(true);
+              }}
+            >
+              Add Item to Container
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setCollapsed((prev) => !prev)}
+            >
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+              ></i>
+            </Button>
+          </div>
         </Card.Header>
-        <Card.Body>
-          <Table bordered>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Container</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {itemLocations.map((loc) => (
-                <tr key={loc.ItemLocationID}>
-                  <td>{getItemName(loc.ItemID)}</td>
-                  <td>{getContainerName(loc.ContainerID)}</td>
-                  <td>
-                    <div className="d-flex justify-content-end gap-2">
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        onClick={() => {
-                          setNewLink({
-                            ItemID: loc.ItemID,
-                            ContainerID: loc.ContainerID,
-                            ItemLocationID: loc.ItemLocationID,
-                          });
-                          setShowModal(true);
-                        }}
-                      >
-                        <i className="fas fa-pencil-alt"></i>
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDelete(loc.ItemLocationID)}
-                      >
-                        <i className="fas fa-trash"></i>
-                      </Button>
-                    </div>
-                  </td>
+        {!collapsed && (
+          <Card.Body>
+            <Table bordered>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Container Image</th>
+                  <th>Container</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+              </thead>
+              <tbody>
+                {itemLocations.map((loc) => (
+                  <tr key={loc.ItemLocationID}>
+                    <td>{getItemName(loc.ItemID)}</td>
+                    <td>{getContainerName(loc.ContainerID)}</td>
+                    <td>
+                      {getContainerImage(loc.ContainerID) ? (
+                        <img
+                          src={`data:image/jpeg;base64,${getContainerImage(
+                            loc.ContainerID
+                          )}`}
+                          alt="Container"
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            borderRadius: "4px",
+                          }}
+                        />
+                      ) : (
+                        "No image"
+                      )}
+                    </td>
+
+                     <td style={{ width: "1%", whiteSpace: "nowrap" }}>
+                      <div className="d-flex justify-content-end gap-2">
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => {
+                            setNewLink({
+                              ItemID: loc.ItemID,
+                              ContainerID: loc.ContainerID,
+                              ItemLocationID: loc.ItemLocationID,
+                            });
+                            setShowModal(true);
+                          }}
+                        >
+                          <i className="fas fa-pencil-alt"></i>
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDelete(loc.ItemLocationID)}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card.Body>
+        )}
       </Card>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{newLink.ItemLocationID ? "Edit" : "Assign"} Item to Container</Modal.Title>
+          <Modal.Title>
+            {newLink.ItemLocationID ? "Edit" : "Assign"} Item to Container
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -163,7 +229,9 @@ const ItemLocations = () => {
               <Form.Control
                 as="select"
                 value={newLink.ItemID}
-                onChange={(e) => setNewLink({ ...newLink, ItemID: e.target.value })}
+                onChange={(e) =>
+                  setNewLink({ ...newLink, ItemID: e.target.value })
+                }
               >
                 <option value="">-- Select Item --</option>
                 {items.map((item) => (
@@ -179,11 +247,16 @@ const ItemLocations = () => {
               <Form.Control
                 as="select"
                 value={newLink.ContainerID}
-                onChange={(e) => setNewLink({ ...newLink, ContainerID: e.target.value })}
+                onChange={(e) =>
+                  setNewLink({ ...newLink, ContainerID: e.target.value })
+                }
               >
                 <option value="">-- Select Container --</option>
                 {containers.map((container) => (
-                  <option key={container.ContainerID} value={container.ContainerID}>
+                  <option
+                    key={container.ContainerID}
+                    value={container.ContainerID}
+                  >
                     {container.ContainerName}
                   </option>
                 ))}

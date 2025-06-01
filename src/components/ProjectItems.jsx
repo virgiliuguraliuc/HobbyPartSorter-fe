@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Button, Table, Modal, Form } from "react-bootstrap";
+import {
+  Button,
+  Table,
+  Modal,
+  Form,
+  Card,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
@@ -9,6 +17,7 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   const [modalData, setModalData] = useState({
     ProjectItemID: null,
@@ -66,7 +75,9 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
 
     try {
       const response = await authFetch(
-        `${getApiBaseUrl()}/api/ProjectsBlob/DeleteProjectItem/${selectedForDelete.ProjectItemID}`,
+        `${getApiBaseUrl()}/api/ProjectsBlob/DeleteProjectItem/${
+          selectedForDelete.ProjectItemID
+        }`,
         { method: "DELETE" }
       );
 
@@ -88,69 +99,103 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
   }, [ProjectID]);
 
   return (
-    <div>
-      <Button
-        className="mb-3"
-        size="sm"
-        onClick={() => {
-          setModalData({
-            ProjectItemID: null,
-            UserItemID: "",
-            QuantityUsed: 1,
-          });
-          setIsEditing(false);
-          setShowModal(true);
-        }}
-      >
-        Add Project Item
-      </Button>
+    <div className="mt-4">
+      <Card>
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">Project Items</h5>
+        {/* <div className="row"> */}
+          <div className="d-flex justify-content-between align-items-center gap-2">
+            <Button
+             
+              onClick={() => {
+                setModalData({
+                  ProjectItemID: null,
+                  UserItemID: "",
+                  QuantityUsed: 1,
+                });
+                setIsEditing(false);
+                setShowModal(true);
+              }}
+            >
+              Add Project Item
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setCollapsed((prev) => !prev)}
+            >
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+              ></i>
+            </Button>
+          {/* </div> */}
+</div>
+        </Card.Header>
 
-      <Table bordered size="sm">
-        <thead>
-          <tr>
-            <th>Item Name</th>
-            <th>Quantity Used</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => {
-            const matchedItem = availableItems.find(
-              (av) => av.UserItemID === item.UserItemID
-            );
-            return (
-              <tr key={item.ProjectItemID}>
-                <td>{matchedItem?.ItemName || "Unknown"}</td>
-                <td>{item.QuantityUsed}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => {
-                      setModalData(item);
-                      setIsEditing(true);
-                      setShowModal(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedForDelete(item);
-                      setShowDeleteModal(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+        {!collapsed && (
+          <Card.Body>
+            <Table bordered size="sm">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Quantity Used</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => {
+                  const matchedItem = availableItems.find(
+                    (av) => av.UserItemID === item.UserItemID
+                  );
+                  return (
+                    <tr key={item.ProjectItemID}>
+                      <td>{matchedItem?.ItemName || "Unknown"}</td>
+                          <td className="text-end" style={{ width: "1%", whiteSpace: "wrap" }}>{item.QuantityUsed}</td>
+                      <td style={{ width: "1%", whiteSpace: "nowrap" }}>
+                        <div className="d-flex justify-content-end gap-2">
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Edit</Tooltip>}
+                          >
+                            <Button
+                              variant="warning"
+                              size="sm"
+                              className=""
+                              onClick={() => {
+                                setModalData(item);
+                                setIsEditing(true);
+                                setShowModal(true);
+                              }}
+                            >
+                              <i className="fas fa-pencil-alt"></i>
+                            </Button>
+                          </OverlayTrigger>
+                          <OverlayTrigger
+                            placement="top"
+                            overlay={<Tooltip>Delete</Tooltip>}
+                          >
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedForDelete(item);
+                                setShowDeleteModal(true);
+                              }}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </OverlayTrigger>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          </Card.Body>
+        )}
+      </Card>
 
       <ConfirmationModal
         show={showDeleteModal}

@@ -6,22 +6,28 @@ export const authFetch = async (url, options = {}) => {
     Authorization: `Bearer ${token}`,
   };
 
-  // Do not set Content-Type if body is FormData
   if (!(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  // Handle 403 Forbidden - redirect to login
-  if (response.status === 403) {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-    return new Promise(() => {}); // Halt execution
+    if (response.status === 403) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+      return new Promise(() => {});
+    }
+
+    return response;
+  } catch (error) {
+    console.error("authFetch network error:", error);
+
+    // Optionally redirect or show error UI
+    window.location.href = "/offline"; // or show a toast/modal
+    return new Promise(() => {});
   }
-
-  return response;
 };

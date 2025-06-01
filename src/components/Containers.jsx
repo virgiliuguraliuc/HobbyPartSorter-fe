@@ -19,6 +19,7 @@ const Containers = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedForDelete, setSelectedForDelete] = useState(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   const fetchContainers = async () => {
     setLoading(true);
@@ -138,6 +139,7 @@ const Containers = () => {
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5>Containers</h5>
+ <div className="d-flex gap-2">
           <Button onClick={() => {
             setModalData({
               ContainerID: null,
@@ -151,7 +153,15 @@ const Containers = () => {
           }}>
             Add Container
           </Button>
+              <Button
+                        variant="outline-secondary"
+                        onClick={() => setCollapsed((prev) => !prev)}
+                      >
+                        <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`}></i>
+                      </Button>
+</div>
         </Card.Header>
+          {!collapsed && (
         <Card.Body>
           <Table bordered size="sm" responsive>
             <thead>
@@ -212,6 +222,7 @@ const Containers = () => {
             </tbody>
           </Table>
         </Card.Body>
+          )}
       </Card>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>

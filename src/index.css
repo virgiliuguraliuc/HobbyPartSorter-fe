@@ -1,29 +1,39 @@
 /* ===== LIGHT THEME ===== */
 :root[data-theme="light"] {
   --bg-body: linear-gradient(-45deg, #76a1ac, #3f5877, #73d8ef, #435a7b);
-  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-header: rgba(255, 255, 255, 0.85);
+  --bg-card-body: rgba(255, 255, 255, 0.95);
+  --card-divider: #ccc;
   --text-color: #000000;
-  --table-bg: rgba(255, 255, 255, 0.85);
+  --table-bg: rgba(255, 255, 255, 1);
   --table-text: #000000;
   --table-border: #dee2e6;
   --btn-bg: #1a1a1a;
   --btn-text: #ffffff;
   --btn-border: #646cff;
   --btn-hover-border: #535bf2;
+    --list-bg: rgba(255, 255, 255, 0.85);
+  --list-text: #000;
+  --list-border: #ddd;
 }
 
 /* ===== DARK THEME ===== */
 :root[data-theme="dark"] {
   --bg-body: linear-gradient(-45deg, #1c1e26, #252a33, #1f2631, #2c3b51);
-  --bg-card: rgba(30, 30, 30, 1);
+  --bg-card-header: rgba(35, 35, 35, 1);
+  --bg-card-body: rgba(45, 45, 45,1); 
+  --card-divider: rgba(30, 30, 30, 1);
   --text-color: #f0f0f0;
-  --table-bg: rgba(30, 30, 30, 0.85);
-  --table-text:#f9f9f9;
+  --table-bg: rgba(30, 30, 30, 1);
+  --table-text: #f9f9f9;
   --table-border: #444;
   --btn-bg: #333333;
   --btn-text: #f9f9f9;
   --btn-border: #888;
   --btn-hover-border: #aaa;
+  --list-bg: rgba(30, 30, 30, 1);
+  --list-text: #f0f0f0;
+  --list-border: #444;
 }
 
 body {
@@ -32,10 +42,11 @@ body {
   min-height: 100vh;
 
   /* 🌈 Gradient Background */
-  background: linear-gradient(-45deg, #76a1ac, #3f5877, #73d8ef, #435a7b);
+  background: linear-gradient(-45deg, #546265, #3f5877, #252f71, #435a7b);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
-   color: var(--text-color);
+  color: var(--text-color);
+  
 }
 
 @keyframes gradientShift {
@@ -79,7 +90,7 @@ button {
   border-radius: 8px;
   border: 1px solid var(--btn-border);
   padding: 0.6em 1.2em;
-    color: var(--btn-text);
+  color: var(--btn-text);
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
@@ -119,7 +130,7 @@ button:focus-visible {
   background-color: var(--table-bg) !important;
   color: var(--table-text) !important;
   border-color: var(--table-border) !important;
-    border-width: 1px;
+  border-width: 1px;
   border-style: solid;
 }
 
@@ -133,10 +144,38 @@ button:focus-visible {
 }
 
 .card {
-  background-color: var(--bg-card) !important;
   color: var(--text-color) !important;
+  background-color: var(--bg-card) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 1px solid var(--card-divider);
+  overflow: hidden;
 }
 
+.card-header {
+  background-color: var(--bg-card-header) !important;
+  border-bottom: 1px solid var(--card-divider) !important;
+}
+
+.card-body {
+  background-color: var(--bg-card-body) !important;
+}.card {
+  color: var(--text-color) !important;
+  background-color: var(--bg-card) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 1px solid var(--card-divider);
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--bg-card-header) !important;
+  border-bottom: 1px solid var(--card-divider) !important;
+}
+
+.card-body {
+  background-color: var(--bg-card-body) !important;
+}
 .modal-content {
   background-color: var(--bg-card) !important;
   color: var(--text-color) !important;
@@ -152,7 +191,6 @@ button:focus-visible {
   border-color: var(--btn-hover-border) !important;
 }
 
-
 @media (prefers-color-scheme: dark) {
   :root {
     color: #213547;
@@ -165,7 +203,6 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-
 
 /* Container is optional if you want to scope the icons */
 .floating-cogs {
@@ -222,3 +259,46 @@ button:focus-visible {
   animation-delay: 5s;
 }
 
+
+
+.table {
+  border-radius: 14px !important;
+  overflow: hidden; /* Ensures borders don't leak past rounding */
+}
+
+.table thead:first-child tr:first-child th:first-child {
+  border-top-left-radius: 14px !important;
+}
+
+.table thead:first-child tr:first-child th:last-child {
+  border-top-right-radius: 14px !important;
+}
+
+.table tbody:last-child tr:last-child td:first-child {
+  border-bottom-left-radius: 14px !important;
+}
+
+.table tbody:last-child tr:last-child td:last-child {
+  border-bottom-right-radius: 14px !important;
+}
+
+
+.list-group {
+  background-color: var(--list-bg);
+  color: var(--list-text);
+}
+
+.list-group-item {
+  background-color: var(--list-bg) !important;
+  color: var(--list-text) !important;
+  border-bottom: 1px solid var(--list-border) !important;
+}
+
+.list-group-item:last-child {
+  border-bottom: none !important;
+}
+
+.badge.bg-primary {
+  background-color: var(--btn-border) !important;
+  color: var(--btn-text) !important;
+}

@@ -34,6 +34,8 @@ const ItemsList = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [sortField, setSortField] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
+  const [containers, setContainers] = useState([]);
+  const [itemLocations, setItemLocations] = useState([]);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -64,11 +66,12 @@ const ItemsList = () => {
       return sortOrder === "asc" ? valA - valB : valB - valA;
     }
   });
+
   const toggleAllDetails = () => {
     const allExpanded = Object.values(expandedRows).every((v) => v === true);
     const newState = {};
     items.forEach((item) => {
-      newState[item.itemID] = !allExpanded; // ✅ consistent with row logic
+      newState[item.itemID] = !allExpanded;
     });
     setExpandedRows(newState);
   };
@@ -98,6 +101,26 @@ const ItemsList = () => {
       setCategories(data);
     } catch (error) {
       console.error("Error loading categories:", error);
+    }
+  };
+
+  const fetchContainers = async () => {
+    const res = await authFetch(
+      `${getApiBaseUrl()}/api/containers/GetContainers`
+    );
+    const data = await res.json();
+    setContainers(data);
+  };
+
+  const fetchItemLocations = async () => {
+    try {
+      const res = await authFetch(
+        `${getApiBaseUrl()}/api/item_locations/GetItemLocations`
+      );
+      const data = await res.json();
+      setItemLocations(data);
+    } catch (err) {
+      console.error("Failed to fetch item locations", err);
     }
   };
 
@@ -151,13 +174,13 @@ const ItemsList = () => {
   const handleSave = async () => {
     const url = isEditing
       ? `${getApiBaseUrl()}/api/ItemsBlob/UpdateItem`
-      : `${getApiBaseUrl()}api/ItemsBlob/AddItem`;
-    const method = isEditing ? "POST" : "POST";
+      : `${getApiBaseUrl()}/api/ItemsBlob/AddItem`;
+    const method = "POST";
 
     try {
       const formData = new FormData();
       if (isEditing && modalData.itemID !== null) {
-        formData.append("itemID", modalData.itemID); //cum sa il uiti
+        formData.append("itemID", modalData.itemID);
       }
       formData.append("itemName", modalData.ItemName);
       formData.append("categoryID", modalData.CategoryID);
@@ -170,9 +193,6 @@ const ItemsList = () => {
         const resizedImage = await handleImageResize(modalData.ImageFile);
         formData.append("image", resizedImage, modalData.ImageFile.name);
       }
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
 
       const response = await authFetch(url, {
         method,
@@ -180,7 +200,51 @@ const ItemsList = () => {
       });
 
       if (response.ok) {
-        fetchItems();
+        await fetchItems();
+        await fetchItemLocations();
+
+        if (modalData.ContainerID) {
+          const itemListRes = await authFetch(
+            `${getApiBaseUrl()}/api/ItemsBlob/GetItems`
+          );
+          const itemList = await itemListRes.json();
+
+          const matchedItem = isEditing
+            ? itemList.find((i) => i.ItemID === modalData.itemID)
+            : itemList.find((i) => i.ItemName === modalData.ItemName);
+
+          if (matchedItem) {
+            const existingLink = itemLocations.find(
+              (loc) => loc.ItemID === matchedItem.ItemID
+            );
+            if (existingLink) {
+              await authFetch(
+                `${getApiBaseUrl()}/api/item_locations/DeleteItemLocation/${
+                  existingLink.ItemLocationID
+                }`,
+                { method: "DELETE" }
+              );
+            }
+
+            const locationPayload = {
+              ItemID: matchedItem.ItemID,
+              ContainerID: parseInt(modalData.ContainerID),
+              UserID: null,
+            };
+
+            await authFetch(
+              `${getApiBaseUrl()}/api/item_locations/AddItemLocation`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(locationPayload),
+              }
+            );
+
+            await fetchItemLocations();
+          }
+        }
+
         setShowModal(false);
       } else {
         console.error("Failed to save item");
@@ -197,7 +261,9 @@ const ItemsList = () => {
 
     try {
       await authFetch(
-        `${getApiBaseUrl()}/api/ItemsBlob/DeleteItem/${selectedForDelete.ItemID}`,
+        `${getApiBaseUrl()}/api/ItemsBlob/DeleteItem/${
+          selectedForDelete.ItemID
+        }`,
         {
           method: "DELETE",
         }
@@ -215,7 +281,51 @@ const ItemsList = () => {
   useEffect(() => {
     fetchItems();
     fetchCategories();
+    fetchContainers();
+    fetchItemLocations();
   }, []);
+
+  const enrichedItems = items.map((item) => {
+    const matchedLocation = itemLocations.find(
+      (loc) => loc.ItemID === item.ItemID
+    );
+    const container = matchedLocation
+      ? containers.find((c) => c.ContainerID === matchedLocation.ContainerID)
+      : null;
+
+    return {
+      ...item,
+      ContainerID: matchedLocation?.ContainerID || null,
+      ContainerName: container?.ContainerName || null,
+      ContainerImage: container?.Image || null,
+    };
+  });
+  const getContainerById = (id) => containers.find((c) => c.ContainerID === id);
+
+  useEffect(() => {
+    console.log(containers);
+  }, [containers]);
+
+  const sortedEnrichedItems = [...enrichedItems].sort((a, b) => {
+    if (!sortField) return 0;
+    let valA = a[sortField];
+    let valB = b[sortField];
+    if (sortField === "CategoryName") {
+      valA =
+        categories.find((c) => c.CategoryID === a.CategoryID)?.CategoryName ||
+        "";
+      valB =
+        categories.find((c) => c.CategoryID === b.CategoryID)?.CategoryName ||
+        "";
+    }
+    if (typeof valA === "string") {
+      return sortOrder === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    } else {
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    }
+  });
 
   const toggleDetails = (id) => {
     setExpandedRows((prev) => ({
@@ -242,7 +352,7 @@ const ItemsList = () => {
                   Quantity: "",
                   Description: "",
                   ImageFile: null,
-                });
+                })
                 setIsEditing(false);
                 setShowModal(true);
               }}
@@ -251,14 +361,12 @@ const ItemsList = () => {
             </Button>
             <Button
               variant="outline-secondary"
-              style={{ backgroundColor: "transparent", borderColor: "#6c757d" }}
               onClick={() => setCollapsed((prev) => !prev)}
             >
               <i
                 className={`bi ${
                   collapsed ? "bi-chevron-down" : "bi-chevron-up"
                 }`}
-                style={{ color: "#6c757d" }}
               ></i>
             </Button>
           </div>
@@ -284,7 +392,8 @@ const ItemsList = () => {
                         <i className="bi bi-eye"></i>
                       </Button>
                     </th>
-                    <th>
+                    <th>Container</th>
+                    <th className="d-none d-md-table-cell">
                       <span className="d-none d-sm-inline">Weight</span> (kg)
                       <Button
                         variant="light"
@@ -304,7 +413,7 @@ const ItemsList = () => {
                       </Button>
                     </th>
 
-                    <th>
+                    <th className="d-none d-md-table-cell">
                       <span className="d-none d-sm-inline">Price</span> ($)
                       <Button
                         variant="light"
@@ -344,7 +453,7 @@ const ItemsList = () => {
                       </Button>
                     </th>
 
-                    <th>
+                    <th className="d-none d-md-table-cell">
                       <span className="d-none d-sm-inline">Quant.</span> (#)
                       <Button
                         variant="light"
@@ -368,7 +477,7 @@ const ItemsList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedItems.map((item) => {
+                  {sortedEnrichedItems.map((item) => {
                     const categoryName =
                       categories.find(
                         (cat) => cat.CategoryID === item.CategoryID
@@ -407,15 +516,35 @@ const ItemsList = () => {
                           </div>
                         </td>
                         <td>
+                          <div className="text-end">
+                            {item.ContainerImage ? (
+                              <img
+                                src={`data:image/png;base64,${item.ContainerImage}`}
+                                alt="container"
+                                style={{
+                                  width: "50px",
+                                  height: "50px",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : (
+                              <small>
+                                {getContainerById(item.ContainerID)
+                                  ?.ContainerName || "No Container"}
+                              </small>
+                            )}
+                          </div>
+                        </td>
+                        <td className="d-none d-md-table-cell">
                           <div className="text-end">{item.Weight} kg </div>
                         </td>
-                        <td>
+                        <td className="d-none d-md-table-cell">
                           <div className="text-end">{item.Price} $</div>
                         </td>
                         <td>
                           <div className="text-end">{categoryName}</div>
                         </td>
-                        <td>
+                        <td className="d-none d-md-table-cell">
                           <div className="text-end">{item.Quantity}</div>
                         </td>
                         <td className="text-end">
@@ -544,13 +673,31 @@ const ItemsList = () => {
             <Form.Group>
               <Form.Label>Quantity</Form.Label>
               <Form.Control
-                as="textarea"
+                type="number"
                 value={modalData.Quantity}
                 onChange={(e) =>
                   setModalData({ ...modalData, Quantity: e.target.value })
                 }
               />
             </Form.Group>
+            <Form.Group>
+              <Form.Label>Assign to Container</Form.Label>
+              <Form.Control
+                as="select"
+                value={modalData.ContainerID || ""}
+                onChange={(e) =>
+                  setModalData({ ...modalData, ContainerID: e.target.value })
+                }
+              >
+                <option value="">-- Select Container --</option>
+                {containers.map((c) => (
+                  <option key={c.ContainerID} value={c.ContainerID}>
+                    {c.ContainerName}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+
             <Form.Group>
               <Form.Label>Image</Form.Label>
               <Form.Control

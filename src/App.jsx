@@ -12,9 +12,11 @@ import InventoryOverview from './components/InventoryOverview';
 import Storage from './components/Storage';
 import Home from './components/Home';
 import Settings from './components/Settings';
+import Offline from './components/Offline';
 import ForgotPassword from './components/ForgotPassword';
 import LanguageProvider from './components/LanguageProvider'; // Import the LanguageProvider
 import { ThemeProvider } from './contexts/ThemeContext';
+
 
 //ADAUGA CEVA P/ YEP AI UITAT
 const App = () => {
@@ -38,6 +40,7 @@ const App = () => {
                         <Route path="/projects" element={<Projects />} />
                         <Route path="/" element={<Home />} />
                         <Route path="/settings" element={<Settings />} />
+                        <Route path="/offline" element={<Offline />} />
                     </Routes>
                 </div>
                   <div className="floating-cogs">

@@ -113,10 +113,9 @@ const Categories = () => {
             </Button>
                 <Button
               variant="outline-secondary"
-              style={{ backgroundColor: "transparent", borderColor: "#6c757d" }}
               onClick={() => setCollapsed((prev) => !prev)}
             >
-              <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`} style={{ color: "#6c757d" }}></i>
+              <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`} ></i>
             </Button>
           </div>
         </Card.Header>
@@ -136,7 +135,8 @@ const Categories = () => {
                   <tr key={Category.CategoryID}>
                     <td>{Category.CategoryID}</td>
                     <td>{Category.CategoryName}</td>
-                    <td className="d-flex justify-content-end gap-2">
+                     <td style={{ width: "1%", whiteSpace: "nowrap" }}>
+                    <div className="d-flex justify-content-end gap-2">
                       <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
                         <Button
                           variant="warning"
@@ -162,6 +162,7 @@ const Categories = () => {
                           <i className="fas fa-trash"></i>
                         </Button>
                       </OverlayTrigger>
+                    </div>
                     </td>
                   </tr>
                 ))}

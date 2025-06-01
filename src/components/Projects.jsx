@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Modal,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import ProjectItems from "./ProjectItems";
 import Notes from "./Notes";
 import { authFetch } from "../utils/authFetch";
@@ -21,7 +28,9 @@ const Projects = () => {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await authFetch(`${getApiBaseUrl()}/api/ProjectsBlob/GetProjects`);
+      const response = await authFetch(
+        `${getApiBaseUrl()}/api/ProjectsBlob/GetProjects`
+      );
       const data = await response.json();
       setProjects(data || []);
     } catch (error) {
@@ -31,15 +40,17 @@ const Projects = () => {
     }
   };
 
-const fetchAvailableItems = async () => {
-  try {
-    const response = await authFetch(`${getApiBaseUrl()}/api/UserItemsBlob/GetUserItems`); 
-     const data = await response.json(); 
-    setAvailableItems(data || []);
-  } catch (error) {
-    console.error("Error loading user items:", error);
-  }
-};
+  const fetchAvailableItems = async () => {
+    try {
+      const response = await authFetch(
+        `${getApiBaseUrl()}/api/UserItemsBlob/GetUserItems`
+      );
+      const data = await response.json();
+      setAvailableItems(data || []);
+    } catch (error) {
+      console.error("Error loading user items:", error);
+    }
+  };
 
   useEffect(() => {
     fetchProjects();
@@ -130,6 +141,7 @@ const fetchAvailableItems = async () => {
 
   return (
     <div className="mt-4">
+      <div className="d-flex flex-column align-items-end justify-content-start">
       <Button
         className="mb-3"
         onClick={() => {
@@ -145,6 +157,7 @@ const fetchAvailableItems = async () => {
       >
         Add Project
       </Button>
+      </div>
 
       {loading ? (
         <p>Loading...</p>
@@ -160,7 +173,12 @@ const fetchAvailableItems = async () => {
                     <img
                       src={`data:image/jpeg;base64,${project.Image}`}
                       alt={project.ProjectName}
-                      style={{ width: "80px", height: "80px", marginRight: "15px", borderRadius: "5px" }}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        marginRight: "15px",
+                        borderRadius: "5px",
+                      }}
                     />
                   )}
                   <div>
@@ -168,35 +186,43 @@ const fetchAvailableItems = async () => {
                     <p>{project.Description}</p>
                   </div>
                 </div>
-                <div className="d-flex flex-column align-items-end">
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      className="mb-2"
-                      onClick={() => {
-                        setModalData({
-                          ProjectID: project.ProjectID,
-                          ProjectName: project.ProjectName,
-                          Description: project.Description,
-                          imageFile: null,
-                        });
-                        setIsEditing(true);
-                        setShowModal(true);
-                      }}
+                <div className="d-flex flex-column align-items-end justify-content-start">
+                  <div className=" d-flex gap-2">
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={<Tooltip>Edit</Tooltip>}
                     >
-                      <i className="fas fa-pencil-alt"></i>
-                    </Button>
-                  </OverlayTrigger>
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Delete Project</Tooltip>}>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(project.ProjectID)}
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        className=""
+                        onClick={() => {
+                          setModalData({
+                            ProjectID: project.ProjectID,
+                            ProjectName: project.ProjectName,
+                            Description: project.Description,
+                            imageFile: null,
+                          });
+                          setIsEditing(true);
+                          setShowModal(true);
+                        }}
+                      >
+                        <i className="fas fa-pencil-alt"></i>
+                      </Button>
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={<Tooltip>Delete Project</Tooltip>}
                     >
-                      <i className="fas fa-trash"></i>
-                    </Button>
-                  </OverlayTrigger>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(project.ProjectID)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </Button>
+                    </OverlayTrigger>
+                  </div>
                 </div>
               </div>
             </Card.Header>
@@ -217,7 +243,9 @@ const fetchAvailableItems = async () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Project" : "Add Project"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Project" : "Add Project"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -247,7 +275,10 @@ const fetchAvailableItems = async () => {
                 type="file"
                 onChange={(e) => {
                   if (e.target.files[0]) {
-                    setModalData({ ...modalData, imageFile: e.target.files[0] });
+                    setModalData({
+                      ...modalData,
+                      imageFile: e.target.files[0],
+                    });
                   }
                 }}
               />

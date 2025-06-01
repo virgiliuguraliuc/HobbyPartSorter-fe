@@ -25,6 +25,7 @@ const Locations = () => {
     Address: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const fetchLocations = async () => {
     setLoading(true);
@@ -69,7 +70,9 @@ const Locations = () => {
   const handleDelete = async () => {
     try {
       const response = await authFetch(
-        `${getApiBaseUrl()}/api/locations/DeleteLocation/${selectedForDelete.LocationID}`,
+        `${getApiBaseUrl()}/api/locations/DeleteLocation/${
+          selectedForDelete.LocationID
+        }`,
         { method: "DELETE" }
       );
 
@@ -92,75 +95,105 @@ const Locations = () => {
   return (
     <div className="mt-4">
       <Card>
-        <Card.Header as="h5" className="d-flex justify-content-between align-items-center">
+        <Card.Header
+          as="h5"
+          className="d-flex justify-content-between align-items-center"
+        >
           <span>Locations</span>
-          <Button
-            variant="primary"
-            onClick={() => {
-              setModalData({ LocationID: null, LocationName: "", LocationType: "", Address: "" });
-              setIsEditing(false);
-              setShowModal(true);
-            }}
-          >
-            Add Location
-          </Button>
+          <div className="d-flex gap-2">
+            <Button
+              variant="primary"
+              onClick={() => {
+                setModalData({
+                  LocationID: null,
+                  LocationName: "",
+                  LocationType: "",
+                  Address: "",
+                });
+                setIsEditing(false);
+                setShowModal(true);
+              }}
+            >
+              Add Location
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setCollapsed((prev) => !prev)}
+            >
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+              ></i>
+            </Button>
+          </div>
         </Card.Header>
-        <Card.Body>
-          <Table bordered size="sm" responsive> 
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Address</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {locations.map((location) => (
-                <tr key={location.LocationID}>
-                  <td>{location.LocationName}</td>
-                  <td>{location.LocationType || "N/A"}</td>
-                  <td>{location.Address || "N/A"}</td>
-                  <td className="text-end">
-                    <div className="d-flex justify-content-end gap-2">
-                      <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
-                        <Button
-                          variant="warning"
-                          size="sm"
-                          onClick={() => {
-                            setModalData(location);
-                            setIsEditing(true);
-                            setShowModal(true);
-                          }}
-                        >
-                          <i className="fas fa-pencil-alt"></i>
-                        </Button>
-                      </OverlayTrigger>
-                      <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedForDelete(location);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </OverlayTrigger>
-                    </div>
-                  </td>
+        {!collapsed && (
+          <Card.Body>
+            <Table bordered size="sm" responsive>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Address</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
+              </thead>
+              <tbody>
+                {locations.map((location) => (
+                  <tr key={location.LocationID}>
+                    <td>{location.LocationName}</td>
+                    <td>{location.LocationType || "N/A"}</td>
+                    <td>{location.Address || "N/A"}</td>
+                    <td className="text-end">
+                      <div className="d-flex justify-content-end gap-2">
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Edit</Tooltip>}
+                        >
+                          <Button
+                            variant="warning"
+                            size="sm"
+                            onClick={() => {
+                              setModalData(location);
+                              setIsEditing(true);
+                              setShowModal(true);
+                            }}
+                          >
+                            <i className="fas fa-pencil-alt"></i>
+                          </Button>
+                        </OverlayTrigger>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Delete</Tooltip>}
+                        >
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedForDelete(location);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </Button>
+                        </OverlayTrigger>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card.Body>
+        )}
       </Card>
 
       {/* Add/Edit Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Location" : "Add Location"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Location" : "Add Location"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -169,7 +202,9 @@ const Locations = () => {
               <Form.Control
                 type="text"
                 value={modalData.LocationName}
-                onChange={(e) => setModalData({ ...modalData, LocationName: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, LocationName: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group>
@@ -177,7 +212,9 @@ const Locations = () => {
               <Form.Control
                 type="text"
                 value={modalData.LocationType}
-                onChange={(e) => setModalData({ ...modalData, LocationType: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, LocationType: e.target.value })
+                }
               />
             </Form.Group>
             <Form.Group>
@@ -185,7 +222,9 @@ const Locations = () => {
               <Form.Control
                 type="text"
                 value={modalData.Address}
-                onChange={(e) => setModalData({ ...modalData, Address: e.target.value })}
+                onChange={(e) =>
+                  setModalData({ ...modalData, Address: e.target.value })
+                }
               />
             </Form.Group>
           </Form>
