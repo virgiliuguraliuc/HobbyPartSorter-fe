@@ -106,6 +106,15 @@ const Notes = ({ projectID = null }) => {
     fetchProjects();
   }, [projectID]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+const [itemsPerPage, setItemsPerPage] = useState(5);
+
+const indexOfLast = currentPage * itemsPerPage;
+const indexOfFirst = indexOfLast - itemsPerPage;
+const paginated = notes.slice(indexOfFirst, indexOfLast);
+const totalPages = Math.ceil(notes.length / itemsPerPage);
+
+
   return (
     <div className="mt-4">
       <Card>
@@ -151,7 +160,7 @@ const Notes = ({ projectID = null }) => {
                 </tr>
               </thead>
               <tbody>
-                {notes.map((note) => {
+                {paginated.map((note) => {
                   const project = projects.find(
                     (p) => p.ProjectID === note.ProjectID
                   );
@@ -208,6 +217,42 @@ const Notes = ({ projectID = null }) => {
                 })}
               </tbody>
             </Table>
+            <div className="d-flex justify-content-end align-items-center mt-2 gap-2">
+  <Form.Select
+    size="sm"
+    style={{ width: "auto" }}
+    value={itemsPerPage}
+    onChange={(e) => {
+      setItemsPerPage(parseInt(e.target.value));
+      setCurrentPage(1);
+    }}
+  >
+    <option value={5}>5 per page</option>
+    <option value={10}>10 per page</option>
+    <option value={25}>25 per page</option>
+    <option value={50}>50 per page</option>
+  </Form.Select>
+  <Button
+    size="sm"
+    variant="outline-primary"
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage((prev) => prev - 1)}
+  >
+    &lt; Prev
+  </Button>
+  <span>
+    Page {currentPage} of {totalPages}
+  </span>
+  <Button
+    size="sm"
+    variant="outline-primary"
+    disabled={currentPage === totalPages}
+    onClick={() => setCurrentPage((prev) => prev + 1)}
+  >
+    Next &gt;
+  </Button>
+</div>
+
           </Card.Body>
         )}
       </Card>

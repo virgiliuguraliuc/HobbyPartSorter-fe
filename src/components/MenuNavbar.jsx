@@ -49,7 +49,7 @@ const MenuNavbar = () => {
         <Nav>
           <Dropdown className="mt-1" align="end">
             <Dropdown.Toggle variant="outline-light" id="settings-dropdown">
-              <i className="bi bi-gear"></i>{" "}
+              <i className=" bi bi-gear"></i>{" "}
               {isLoggedIn ? username : t("menu.login")}
             </Dropdown.Toggle>
 
