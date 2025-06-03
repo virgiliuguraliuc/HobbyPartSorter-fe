@@ -26,6 +26,13 @@ const Locations = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const totalPages = Math.ceil(locations.length / itemsPerPage);
+  const paginatedLocations = locations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const fetchLocations = async () => {
     setLoading(true);
@@ -91,15 +98,11 @@ const Locations = () => {
   useEffect(() => {
     fetchLocations();
   }, []);
-
   return (
     <div className="mt-4">
       <Card>
-        <Card.Header
-          as="h5"
-          className="d-flex justify-content-between align-items-center"
-        >
-          <span>Locations</span>
+        <Card.Header className="d-flex justify-content-between align-items-center">
+          <h5 className="mb-0">Locations</h5>
           <div className="d-flex gap-2">
             <Button
               variant="primary"
@@ -128,6 +131,7 @@ const Locations = () => {
             </Button>
           </div>
         </Card.Header>
+
         {!collapsed && (
           <Card.Body>
             <Table bordered size="sm" responsive>
@@ -140,7 +144,7 @@ const Locations = () => {
                 </tr>
               </thead>
               <tbody>
-                {locations.map((location) => (
+                {paginatedLocations.map((location) => (
                   <tr key={location.LocationID}>
                     <td>{location.LocationName}</td>
                     <td>{location.LocationType || "N/A"}</td>
@@ -184,6 +188,43 @@ const Locations = () => {
                 ))}
               </tbody>
             </Table>
+
+            <div className="d-flex justify-content-end align-items-center mt-2 gap-2">
+              <Form.Select
+                size="sm"
+                style={{ width: "auto" }}
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(parseInt(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5 per page</option>
+                <option value={10}>10 per page</option>
+                <option value={25}>25 per page</option>
+                <option value={50}>50 per page</option>
+              </Form.Select>
+
+              <Button
+                size="sm"
+                variant="outline-primary"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                &lt; Prev
+              </Button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                size="sm"
+                variant="outline-primary"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next &gt;
+              </Button>
+            </div>
           </Card.Body>
         )}
       </Card>

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Card, Button, Table, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Card,
+  Button,
+  Table,
+  Modal,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
@@ -21,10 +29,15 @@ const Containers = () => {
   const [selectedForDelete, setSelectedForDelete] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
   const fetchContainers = async () => {
     setLoading(true);
     try {
-      const response = await authFetch(`${getApiBaseUrl()}/api/containers/GetContainers`);
+      const response = await authFetch(
+        `${getApiBaseUrl()}/api/containers/GetContainers`
+      );
       const data = await response.json();
       setContainers(data);
     } catch (error) {
@@ -36,7 +49,9 @@ const Containers = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await authFetch(`${getApiBaseUrl()}/api/locations/GetLocations`);
+      const response = await authFetch(
+        `${getApiBaseUrl()}/api/locations/GetLocations`
+      );
       const data = await response.json();
       setLocations(data);
     } catch (error) {
@@ -112,9 +127,14 @@ const Containers = () => {
   const handleDelete = async () => {
     if (!selectedForDelete) return;
     try {
-      await authFetch(`${getApiBaseUrl()}/api/containers/DeleteContainer/${selectedForDelete.ContainerID}`, {
-        method: "DELETE",
-      });
+      await authFetch(
+        `${getApiBaseUrl()}/api/containers/DeleteContainer/${
+          selectedForDelete.ContainerID
+        }`,
+        {
+          method: "DELETE",
+        }
+      );
       fetchContainers();
     } catch (error) {
       console.error("Error deleting container:", error);
@@ -134,141 +154,215 @@ const Containers = () => {
     fetchLocations();
   }, []);
 
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const paginated = containers.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(containers.length / itemsPerPage);
+
   return (
     <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5>Containers</h5>
- <div className="d-flex gap-2">
-          <Button onClick={() => {
-            setModalData({
-              ContainerID: null,
-              ContainerName: "",
-              LocationID: "",
-              Description: "",
-              imageFile: null,
-            });
-            setIsEditing(false);
-            setShowModal(true);
-          }}>
-            Add Container
-          </Button>
-              <Button
-                        variant="outline-secondary"
-                        onClick={() => setCollapsed((prev) => !prev)}
-                      >
-                        <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`}></i>
-                      </Button>
-</div>
+          <h5 className="mb-0">Containers</h5>
+          <div className="d-flex gap-2">
+            <Button
+              onClick={() => {
+                setModalData({
+                  ContainerID: null,
+                  ContainerName: "",
+                  LocationID: "",
+                  Description: "",
+                  imageFile: null,
+                });
+                setIsEditing(false);
+                setShowModal(true);
+              }}
+            >
+              Add Container
+            </Button>
+            <Button
+              variant="outline-secondary"
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+              />
+            </Button>
+          </div>
         </Card.Header>
-          {!collapsed && (
-        <Card.Body>
-          <Table bordered size="sm" responsive>
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Location</th>
-                <th>Description</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {containers.map((container) => (
-                <tr key={container.ContainerID}>
-                  <td>
-                    {container.Image && (
-                      <img
-                        src={`data:image/jpeg;base64,${container.Image}`}
-                        alt={container.ContainerName}
-                        style={{ width: "50px", height: "50px", borderRadius: "4px" }}
-                      />
-                    )}
-                  </td>
-                  <td>{container.ContainerName}</td>
-                  <td>{getLocationName(container.LocationID)}</td>
-                  <td>{container.Description}</td>
-                  <td className="text-end">
-                    <div className="d-flex justify-content-end gap-2">
-                      <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
-                        <Button
-                          variant="warning"
-                          size="sm"
-                          onClick={() => {
-                            setModalData({ ...container, imageFile: null });
-                            setIsEditing(true);
-                            setShowModal(true);
-                          }}
-                        >
-                          <i className="fas fa-pencil-alt"></i>
-                        </Button>
-                      </OverlayTrigger>
-                      <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedForDelete(container);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </Button>
-                      </OverlayTrigger>
-                    </div>
-                  </td>
+
+        {!collapsed && (
+          <Card.Body>
+            <Table bordered size="sm" responsive>
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Location</th>
+                  <th>Description</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-          )}
+              </thead>
+              <tbody>
+                {paginated.map((container) => (
+                  <tr key={container.ContainerID}>
+                    <td>
+                      {container.Image && (
+                        <img
+                          src={`data:image/jpeg;base64,${container.Image}`}
+                          alt={container.ContainerName}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            borderRadius: "4px",
+                          }}
+                        />
+                      )}
+                    </td>
+                    <td>{container.ContainerName}</td>
+                    <td>{getLocationName(container.LocationID)}</td>
+                    <td>{container.Description}</td>
+                    <td className="text-end">
+                      <div className="d-flex justify-content-end gap-2">
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Edit</Tooltip>}
+                        >
+                          <Button
+                            variant="warning"
+                            size="sm"
+                            onClick={() => {
+                              setModalData({ ...container, imageFile: null });
+                              setIsEditing(true);
+                              setShowModal(true);
+                            }}
+                          >
+                            <i className="fas fa-pencil-alt" />
+                          </Button>
+                        </OverlayTrigger>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Delete</Tooltip>}
+                        >
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedForDelete(container);
+                              setShowDeleteModal(true);
+                            }}
+                          >
+                            <i className="fas fa-trash" />
+                          </Button>
+                        </OverlayTrigger>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+
+            <div className="d-flex justify-content-end align-items-center mt-2 gap-2">
+              <Form.Select
+                size="sm"
+                style={{ width: "auto" }}
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(parseInt(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5 per page</option>
+                <option value={10}>10 per page</option>
+                <option value={25}>25 per page</option>
+                <option value={50}>50 per page</option>
+              </Form.Select>
+              <Button
+                size="sm"
+                variant="outline-primary"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                &lt; Prev
+              </Button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                size="sm"
+                variant="outline-primary"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next &gt;
+              </Button>
+            </div>
+          </Card.Body>
+        )}
       </Card>
+
+      <ConfirmationModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${selectedForDelete?.ContainerName}"?`}
+      />
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Container" : "Add Container"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Container" : "Add Container"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Container Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={modalData.ContainerName}
-                onChange={(e) => setModalData({ ...modalData, ContainerName: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Location</Form.Label>
-              <Form.Select
-                value={modalData.LocationID}
-                onChange={(e) => setModalData({ ...modalData, LocationID: e.target.value })}
-              >
-                <option value="">Select a location</option>
-                {locations.map((loc) => (
-                  <option key={loc.LocationID} value={loc.LocationID}>
-                    {loc.LocationName}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                value={modalData.Description}
-                onChange={(e) => setModalData({ ...modalData, Description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Image</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => setModalData({ ...modalData, imageFile: e.target.files[0] })}
-              />
-            </Form.Group>
-          </Form>
+          <Form.Group>
+            <Form.Label>Container Name</Form.Label>
+            <Form.Control
+              type="text"
+              value={modalData.ContainerName}
+              onChange={(e) =>
+                setModalData({ ...modalData, ContainerName: e.target.value })
+              }
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Location</Form.Label>
+            <Form.Select
+              value={modalData.LocationID}
+              onChange={(e) =>
+                setModalData({ ...modalData, LocationID: e.target.value })
+              }
+            >
+              <option value="">Select a location</option>
+              {locations.map((loc) => (
+                <option key={loc.LocationID} value={loc.LocationID}>
+                  {loc.LocationName}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Description</Form.Label>
+            <Form.Control
+              as="textarea"
+              value={modalData.Description}
+              onChange={(e) =>
+                setModalData({ ...modalData, Description: e.target.value })
+              }
+            />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>Image</Form.Label>
+            <Form.Control
+              type="file"
+              onChange={(e) =>
+                setModalData({ ...modalData, imageFile: e.target.files[0] })
+              }
+            />
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -279,16 +373,7 @@ const Containers = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-      <ConfirmationModal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        onConfirm={handleDelete}
-        title="Confirm Deletion"
-        message={`Are you sure you want to delete "${selectedForDelete?.ContainerName}"?`}
-      />
     </div>
   );
 };
-
 export default Containers;

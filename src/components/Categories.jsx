@@ -7,7 +7,6 @@ import {
   Form,
   OverlayTrigger,
   Tooltip,
-  
 } from "react-bootstrap";
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
@@ -28,7 +27,6 @@ const Categories = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -81,7 +79,9 @@ const Categories = () => {
 
     try {
       await authFetch(
-        `${getApiBaseUrl()}/api/categories/DeleteCategory/${selectedForDelete.CategoryID}`,
+        `${getApiBaseUrl()}/api/categories/DeleteCategory/${
+          selectedForDelete.CategoryID
+        }`,
         {
           method: "DELETE",
         }
@@ -99,14 +99,11 @@ const Categories = () => {
     fetchCategories();
   }, []);
 
-
   const totalPages = Math.ceil(categories.length / itemsPerPage);
   const paginatedCategories = categories.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-
 
   return (
     <div className="mt-4">
@@ -123,8 +120,15 @@ const Categories = () => {
             >
               Add Category
             </Button>
-            <Button variant="outline-secondary" onClick={() => setCollapsed((prev) => !prev)}>
-              <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`} />
+            <Button
+              variant="outline-secondary"
+              onClick={() => setCollapsed((prev) => !prev)}
+            >
+              <i
+                className={`bi ${
+                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
+                }`}
+              />
             </Button>
           </div>
         </Card.Header>
@@ -146,7 +150,10 @@ const Categories = () => {
                     <td>{cat.CategoryName}</td>
                     <td style={{ whiteSpace: "nowrap" }}>
                       <div className="d-flex justify-content-end gap-2">
-                        <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Edit</Tooltip>}
+                        >
                           <Button
                             variant="warning"
                             size="sm"
@@ -159,7 +166,10 @@ const Categories = () => {
                             <i className="fas fa-pencil-alt" />
                           </Button>
                         </OverlayTrigger>
-                        <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={<Tooltip>Delete</Tooltip>}
+                        >
                           <Button
                             variant="danger"
                             size="sm"
@@ -202,7 +212,9 @@ const Categories = () => {
               >
                 &lt; Prev
               </Button>
-              <span>Page {currentPage} of {totalPages}</span>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
               <Button
                 size="sm"
                 variant="outline-primary"
@@ -226,7 +238,9 @@ const Categories = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{isEditing ? "Edit Category" : "Add Category"}</Modal.Title>
+          <Modal.Title>
+            {isEditing ? "Edit Category" : "Add Category"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group>
