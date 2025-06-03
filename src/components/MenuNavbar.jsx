@@ -3,6 +3,7 @@ import { Navbar, Nav, Dropdown } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { LanguageContext } from "./LanguageProvider";
 import { useTranslation } from "react-i18next";
+import ItemSearch from "./ItemSearch";
 
 const MenuNavbar = () => {
   const { language, changeLanguage } = useContext(LanguageContext);
@@ -42,6 +43,7 @@ const MenuNavbar = () => {
             </>
           )}
         </Nav>
+          {isLoggedIn && <ItemSearch />}
 
         <Nav>
           <Dropdown align="end">

@@ -15,6 +15,15 @@ const ItemLocations = () => {
   });
   const [collapsed, setCollapsed] = useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [locationsPerPage, setLocationsPerPage] = useState(10);
+
+  const totalPages = Math.ceil(itemLocations.length / locationsPerPage);
+  const paginatedLocations = itemLocations.slice(
+    (currentPage - 1) * locationsPerPage,
+    currentPage * locationsPerPage
+  );
+
   const fetchItemLocations = async () => {
     try {
       const res = await authFetch(
@@ -118,6 +127,7 @@ const ItemLocations = () => {
   const getContainerImage = (containerID) =>
     containers.find((c) => c.ContainerID === containerID)?.Image || null;
 
+  
   return (
     <div className="mt-4">
       <Card>
@@ -127,11 +137,7 @@ const ItemLocations = () => {
             <Button
               variant="primary"
               onClick={() => {
-                setNewLink({
-                  ItemID: "",
-                  ContainerID: "",
-                  ItemLocationID: null,
-                });
+                setNewLink({ ItemID: "", ContainerID: "", ItemLocationID: null });
                 setShowModal(true);
               }}
             >
@@ -141,49 +147,39 @@ const ItemLocations = () => {
               variant="outline-secondary"
               onClick={() => setCollapsed((prev) => !prev)}
             >
-              <i
-                className={`bi ${
-                  collapsed ? "bi-chevron-down" : "bi-chevron-up"
-                }`}
-              ></i>
+              <i className={`bi ${collapsed ? "bi-chevron-down" : "bi-chevron-up"}`}></i>
             </Button>
           </div>
         </Card.Header>
+
         {!collapsed && (
           <Card.Body>
             <Table bordered>
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th>Container Image</th>
                   <th>Container</th>
+                  <th>Image</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {itemLocations.map((loc) => (
+                {paginatedLocations.map((loc) => (
                   <tr key={loc.ItemLocationID}>
                     <td>{getItemName(loc.ItemID)}</td>
                     <td>{getContainerName(loc.ContainerID)}</td>
                     <td>
                       {getContainerImage(loc.ContainerID) ? (
                         <img
-                          src={`data:image/jpeg;base64,${getContainerImage(
-                            loc.ContainerID
-                          )}`}
+                          src={`data:image/jpeg;base64,${getContainerImage(loc.ContainerID)}`}
                           alt="Container"
-                          style={{
-                            width: "50px",
-                            height: "50px",
-                            borderRadius: "4px",
-                          }}
+                          style={{ width: "50px", height: "50px", borderRadius: "4px" }}
                         />
                       ) : (
                         "No image"
                       )}
                     </td>
-
-                     <td style={{ width: "1%", whiteSpace: "nowrap" }}>
+                    <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                       <div className="d-flex justify-content-end gap-2">
                         <Button
                           variant="warning"
@@ -212,15 +208,52 @@ const ItemLocations = () => {
                 ))}
               </tbody>
             </Table>
+
+            <div className="d-flex justify-content-end align-items-center mt-1 gap-1">
+              <Form.Select
+                size="sm"
+                style={{ width: "auto" }}
+                value={locationsPerPage}
+                onChange={(e) => {
+                  setLocationsPerPage(parseInt(e.target.value, 10));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5 per page</option>
+                <option value={10}>10 per page</option>
+                <option value={25}>25 per page</option>
+                <option value={50}>50 per page</option>
+              </Form.Select>
+
+              <div className="d-flex align-items-center">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  className="me-2"
+                >
+                  &lt; Prev
+                </Button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  className="ms-2"
+                >
+                  Next &gt;
+                </Button>
+              </div>
+            </div>
           </Card.Body>
         )}
       </Card>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>
-            {newLink.ItemLocationID ? "Edit" : "Assign"} Item to Container
-          </Modal.Title>
+          <Modal.Title>{newLink.ItemLocationID ? "Edit" : "Assign"} Item to Container</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -229,9 +262,7 @@ const ItemLocations = () => {
               <Form.Control
                 as="select"
                 value={newLink.ItemID}
-                onChange={(e) =>
-                  setNewLink({ ...newLink, ItemID: e.target.value })
-                }
+                onChange={(e) => setNewLink({ ...newLink, ItemID: e.target.value })}
               >
                 <option value="">-- Select Item --</option>
                 {items.map((item) => (
@@ -247,16 +278,11 @@ const ItemLocations = () => {
               <Form.Control
                 as="select"
                 value={newLink.ContainerID}
-                onChange={(e) =>
-                  setNewLink({ ...newLink, ContainerID: e.target.value })
-                }
+                onChange={(e) => setNewLink({ ...newLink, ContainerID: e.target.value })}
               >
                 <option value="">-- Select Container --</option>
                 {containers.map((container) => (
-                  <option
-                    key={container.ContainerID}
-                    value={container.ContainerID}
-                  >
+                  <option key={container.ContainerID} value={container.ContainerID}>
                     {container.ContainerName}
                   </option>
                 ))}

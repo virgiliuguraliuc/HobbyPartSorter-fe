@@ -37,6 +37,11 @@ const ItemsList = () => {
   const [containers, setContainers] = useState([]);
   const [itemLocations, setItemLocations] = useState([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+ 
+
   const handleSort = (field) => {
     if (sortField === field) {
       setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -334,6 +339,14 @@ const ItemsList = () => {
     }));
   };
 
+   const totalPages = Math.ceil(sortedEnrichedItems.length / itemsPerPage);
+
+
+  const paginatedItems = sortedEnrichedItems.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="mt-4">
       <Card>
@@ -352,7 +365,7 @@ const ItemsList = () => {
                   Quantity: "",
                   Description: "",
                   ImageFile: null,
-                })
+                });
                 setIsEditing(false);
                 setShowModal(true);
               }}
@@ -477,7 +490,7 @@ const ItemsList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedEnrichedItems.map((item) => {
+                  {paginatedItems.map((item) => {
                     const categoryName =
                       categories.find(
                         (cat) => cat.CategoryID === item.CategoryID
@@ -596,7 +609,48 @@ const ItemsList = () => {
                   })}
                 </tbody>
               </Table>
+              
             )}
+            <div className="d-flex justify-content-end align-items-center mt-1 gap-1">
+  <div>
+    <Form.Select
+      size="sm"
+      style={{ width: "auto" }}
+      value={itemsPerPage}
+      onChange={(e) => {
+        setItemsPerPage(parseInt(e.target.value, 10));
+        setCurrentPage(1); // Reset to first page when page size changes
+      }}
+    >
+      <option value={5}>5 per page</option>
+      <option value={10}>10 per page</option>
+      <option value={25}>25 per page</option>
+      <option value={50}>50 per page</option>
+    </Form.Select>
+  </div>
+
+  <div className="d-flex align-items-center">
+    <Button
+      variant="outline-primary"
+      size="sm"
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage((prev) => prev - 1)}
+      className="me-2"
+    >
+      &lt; Prev
+    </Button>
+    <span>Page {currentPage} of {totalPages}</span>
+    <Button
+      variant="outline-primary"
+      size="sm"
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage((prev) => prev + 1)}
+      className="ms-2"
+    >
+      Next &gt;
+    </Button>
+  </div>
+</div>
           </Card.Body>
         )}
       </Card>
