@@ -27,7 +27,7 @@ const MenuNavbar = () => {
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="me-auto">
+        <Nav className="me-auto mt-1">
           {isLoggedIn && (
             <>
               <Nav.Link as={Link} to="/projects">
@@ -40,13 +40,14 @@ const MenuNavbar = () => {
                 <i className="bi bi-layout-text-window-reverse"></i>{" "}
                 {t("menu.inventory")}
               </Nav.Link>
+     
             </>
           )}
         </Nav>
-          {isLoggedIn && <ItemSearch />}
+          {isLoggedIn && <div className="mt-1 me-2"><ItemSearch /> </div>}
 
         <Nav>
-          <Dropdown align="end">
+          <Dropdown className="mt-1" align="end">
             <Dropdown.Toggle variant="outline-light" id="settings-dropdown">
               <i className="bi bi-gear"></i>{" "}
               {isLoggedIn ? username : t("menu.login")}

@@ -11,6 +11,7 @@ import {
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import WebcamCapture from "./WebcamCapture";
 
 const Containers = () => {
   const [containers, setContainers] = useState([]);
@@ -121,6 +122,12 @@ const Containers = () => {
       console.error("Error saving container:", error);
     } finally {
       setShowModal(false);
+      const video = document.querySelector("video");
+      if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach((track) => track.stop());
+      }
+      setPreviewUrl(null); // clear preview on cancel
+      setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
     }
   };
 
@@ -158,6 +165,27 @@ const Containers = () => {
   const indexOfFirst = indexOfLast - itemsPerPage;
   const paginated = containers.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(containers.length / itemsPerPage);
+
+  //not really what i want
+  //   const handleTakePhoto = async () => {
+  //   try {
+  //     const input = document.createElement("input");
+  //     input.type = "file";
+  //     input.accept = "image/*";
+  //     input.capture = "environment"; // try to use back camera on phones
+  //     input.onchange = (e) => {
+  //       const file = e.target.files[0];
+  //       if (file) {
+  //         setModalData((prev) => ({ ...prev, imageFile: file }));
+  //       }
+  //     };
+  //     input.click();
+  //   } catch (err) {
+  //     console.error("Error capturing photo:", err);
+  //   }
+  // };
+
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   return (
     <div className="mt-4">
@@ -305,13 +333,31 @@ const Containers = () => {
 
       <ConfirmationModal
         show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
+        onHide={() => {
+          setShowModal(false);
+          const video = document.querySelector("video");
+          if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach((track) => track.stop());
+          }
+          setPreviewUrl(null); // optional: reset preview
+        }}
         onConfirm={handleDelete}
         title="Confirm Deletion"
         message={`Are you sure you want to delete "${selectedForDelete?.ContainerName}"?`}
       />
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          const video = document.querySelector("video");
+          if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach((track) => track.stop());
+          }
+          setPreviewUrl(null); // clear preview on cancel
+          setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
+        }}
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             {isEditing ? "Edit Container" : "Add Container"}
@@ -356,16 +402,62 @@ const Containers = () => {
           </Form.Group>
           <Form.Group>
             <Form.Label>Image</Form.Label>
-            <Form.Control
-              type="file"
-              onChange={(e) =>
-                setModalData({ ...modalData, imageFile: e.target.files[0] })
-              }
-            />
+            <div className="d-flex align-items-center gap-2">
+              <Form.Control
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setModalData((prev) => ({ ...prev, imageFile: file }));
+                    setPreviewUrl(URL.createObjectURL(file));
+                  }
+                }}
+              />
+            </div>
           </Form.Group>
+          <WebcamCapture
+            inline
+            onStartCamera={() => {
+              setPreviewUrl(null);
+              setModalData((prev) => ({ ...prev, imageFile: null }));
+            }}
+            onCapture={(blob) => {
+              if (!blob) {
+                console.error("Capture failed — no blob.");
+                return;
+              }
+              const file = new File([blob], "captured.jpg", {
+                type: blob.type || "image/jpeg",
+              });
+              setModalData((prev) => ({ ...prev, imageFile: file }));
+              setPreviewUrl(URL.createObjectURL(blob)); // show preview below
+            }}
+          />
+
+          {previewUrl && (
+            <div className="mt-2">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                style={{ maxWidth: "100%", height: "auto", borderRadius: 4 }}
+              />
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowModal(false);
+              const video = document.querySelector("video");
+              if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach((track) => track.stop());
+              }
+              setPreviewUrl(null); // clear preview on cancel
+              setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
+            }}
+          >
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSave}>

@@ -11,6 +11,7 @@ import ProjectItems from "./ProjectItems";
 import Notes from "./Notes";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import WebcamCapture from "./WebcamCapture";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -114,12 +115,19 @@ const Projects = () => {
       });
       if (response.ok) {
         fetchProjects();
-        setShowModal(false);
       } else {
         console.error("Failed to save project");
       }
     } catch (err) {
       console.error("Error saving project:", err);
+    } finally {
+      setShowModal(false);
+      const video = document.querySelector("video");
+      if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach((track) => track.stop());
+      }
+      setPreviewUrl(null); // clear preview on cancel
+      setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
     }
   };
 
@@ -139,24 +147,26 @@ const Projects = () => {
     }
   };
 
+  const [previewUrl, setPreviewUrl] = useState(null);
+
   return (
     <div className="mt-4">
       <div className="d-flex flex-column align-items-end justify-content-start">
-      <Button
-        className="mb-3"
-        onClick={() => {
-          setModalData({
-            ProjectID: null,
-            ProjectName: "",
-            Description: "",
-            imageFile: null,
-          });
-          setIsEditing(false);
-          setShowModal(true);
-        }}
-      >
-        Add Project
-      </Button>
+        <Button
+          className="mb-3"
+          onClick={() => {
+            setModalData({
+              ProjectID: null,
+              ProjectName: "",
+              Description: "",
+              imageFile: null,
+            });
+            setIsEditing(false);
+            setShowModal(true);
+          }}
+        >
+          Add Project
+        </Button>
       </div>
 
       {loading ? (
@@ -241,7 +251,18 @@ const Projects = () => {
         ))
       )}
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          const video = document.querySelector("video");
+          if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach((track) => track.stop());
+          }
+          setPreviewUrl(null); // clear preview on cancel
+          setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
+        }}
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             {isEditing ? "Edit Project" : "Add Project"}
@@ -284,9 +305,48 @@ const Projects = () => {
               />
             </Form.Group>
           </Form>
+             <WebcamCapture
+            inline
+            onStartCamera={() => {
+              setPreviewUrl(null);
+              setModalData((prev) => ({ ...prev, imageFile: null }));
+            }}
+            onCapture={(blob) => {
+              if (!blob) {
+                console.error("Capture failed — no blob.");
+                return;
+              }
+              const file = new File([blob], "captured.jpg", {
+                type: blob.type || "image/jpeg",
+              });
+              setModalData((prev) => ({ ...prev, imageFile: file }));
+              setPreviewUrl(URL.createObjectURL(blob)); // show preview below
+            }}
+          />
+
+          {previewUrl && (
+            <div className="mt-2">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                style={{ maxWidth: "100%", height: "auto", borderRadius: 4 }}
+              />
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowModal(false);
+              const video = document.querySelector("video");
+              if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach((track) => track.stop());
+              }
+              setPreviewUrl(null); // clear preview on cancel
+              setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
+            }}
+          >
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSave}>

@@ -11,6 +11,7 @@ import {
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import WebcamCapture from "./WebcamCapture";
 
 const ItemsList = () => {
   const [items, setItems] = useState([]);
@@ -39,8 +40,6 @@ const ItemsList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
- 
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -249,13 +248,19 @@ const ItemsList = () => {
             await fetchItemLocations();
           }
         }
-
-        setShowModal(false);
       } else {
         console.error("Failed to save item");
       }
     } catch (error) {
       console.error("Error saving item:", error);
+    } finally {
+      setShowModal(false);
+      const video = document.querySelector("video");
+      if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach((track) => track.stop());
+      }
+      setPreviewUrl(null); // clear preview on cancel
+      setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
     }
   };
 
@@ -339,13 +344,14 @@ const ItemsList = () => {
     }));
   };
 
-   const totalPages = Math.ceil(sortedEnrichedItems.length / itemsPerPage);
-
+  const totalPages = Math.ceil(sortedEnrichedItems.length / itemsPerPage);
 
   const paginatedItems = sortedEnrichedItems.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   return (
     <div className="mt-4">
@@ -609,48 +615,49 @@ const ItemsList = () => {
                   })}
                 </tbody>
               </Table>
-              
             )}
             <div className="d-flex justify-content-end align-items-center mt-1 gap-1">
-  <div>
-    <Form.Select
-      size="sm"
-      style={{ width: "auto" }}
-      value={itemsPerPage}
-      onChange={(e) => {
-        setItemsPerPage(parseInt(e.target.value, 10));
-        setCurrentPage(1); // Reset to first page when page size changes
-      }}
-    >
-      <option value={5}>5 per page</option>
-      <option value={10}>10 per page</option>
-      <option value={25}>25 per page</option>
-      <option value={50}>50 per page</option>
-    </Form.Select>
-  </div>
+              <div>
+                <Form.Select
+                  size="sm"
+                  style={{ width: "auto" }}
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(parseInt(e.target.value, 10));
+                    setCurrentPage(1); // Reset to first page when page size changes
+                  }}
+                >
+                  <option value={5}>5 per page</option>
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                </Form.Select>
+              </div>
 
-  <div className="d-flex align-items-center">
-    <Button
-      variant="outline-primary"
-      size="sm"
-      disabled={currentPage === 1}
-      onClick={() => setCurrentPage((prev) => prev - 1)}
-      className="me-2"
-    >
-      &lt; Prev
-    </Button>
-    <span>Page {currentPage} of {totalPages}</span>
-    <Button
-      variant="outline-primary"
-      size="sm"
-      disabled={currentPage === totalPages}
-      onClick={() => setCurrentPage((prev) => prev + 1)}
-      className="ms-2"
-    >
-      Next &gt;
-    </Button>
-  </div>
-</div>
+              <div className="d-flex align-items-center">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  className="me-2"
+                >
+                  &lt; Prev
+                </Button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  className="ms-2"
+                >
+                  Next &gt;
+                </Button>
+              </div>
+            </div>
           </Card.Body>
         )}
       </Card>
@@ -662,7 +669,18 @@ const ItemsList = () => {
         message={`Are you sure you want to delete "${selectedForDelete?.ItemName}"?`}
       />
 
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          const video = document.querySelector("video");
+          if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach((track) => track.stop());
+          }
+          setPreviewUrl(null); // clear preview on cancel
+          setModalData((prev) => ({ ...prev, imageFile: null })); // clear imageFile too
+        }}
+      >
         <Modal.Header closeButton>
           <Modal.Title>{isEditing ? "Edit Item" : "Add Item"}</Modal.Title>
         </Modal.Header>
@@ -762,9 +780,48 @@ const ItemsList = () => {
               />
             </Form.Group>
           </Form>
+          <WebcamCapture
+            inline
+            onStartCamera={() => {
+              setPreviewUrl(null);
+              setModalData((prev) => ({ ...prev, imageFile: null }));
+            }}
+            onCapture={(blob) => {
+              if (!blob) {
+                console.error("Capture failed — no blob.");
+                return;
+              }
+              const file = new File([blob], "captured.jpg", {
+                type: blob.type || "image/jpeg",
+              });
+              setModalData((prev) => ({ ...prev, imageFile: file }));
+              setPreviewUrl(URL.createObjectURL(blob)); // show preview below
+            }}
+          />
+
+          {previewUrl && (
+            <div className="mt-2">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                style={{ maxWidth: "100%", height: "auto", borderRadius: 4 }}
+              />
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setShowModal(false);
+              const video = document.querySelector("video");
+              if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach((track) => track.stop());
+              }
+              setPreviewUrl(null); //  clear preview on cancel
+              setModalData((prev) => ({ ...prev, imageFile: null })); //  clear imageFile too
+            }}
+          >
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSave}>

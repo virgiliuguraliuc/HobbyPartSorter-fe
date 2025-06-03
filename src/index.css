@@ -1,8 +1,9 @@
 /* ===== LIGHT THEME ===== */
 :root[data-theme="light"] {
   --bg-body: linear-gradient(-45deg, #76a1ac, #3f5877, #73d8ef, #435a7b);
-  --bg-card-header: rgba(255, 255, 255, 0.85);
-  --bg-card-body: rgba(255, 255, 255, 0.95);
+  --bg-card-header: rgba(255, 255, 255, 1);
+  --bg-card-body: rgba(255, 255, 255, 1);
+  --bg-card-body: rgba(255, 255, 255, 1); 
   --card-divider: #ccc;
   --text-color: #000000;
   --table-bg: rgba(255, 255, 255, 1);
@@ -21,7 +22,8 @@
 :root[data-theme="dark"] {
   --bg-body: linear-gradient(-45deg, #1c1e26, #252a33, #1f2631, #2c3b51);
   --bg-card-header: rgba(35, 35, 35, 1);
-  --bg-card-body: rgba(45, 45, 45,1); 
+  --bg-card-body: rgba(45, 45, 45, 0.9); 
+  --bg-card: rgba(45, 45, 45,0.9); 
   --card-divider: rgba(30, 30, 30, 1);
   --text-color: #f0f0f0;
   --table-bg: rgba(30, 30, 30, 1);
@@ -175,6 +177,10 @@ button:focus-visible {
 
 .card-body {
   background-color: var(--bg-card-body) !important;
+}
+.modal-header {
+    background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
 }
 .modal-content {
   background-color: var(--bg-card) !important;
