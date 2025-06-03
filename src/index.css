@@ -23,7 +23,7 @@
   --bg-body: linear-gradient(-45deg, #1c1e26, #252a33, #1f2631, #2c3b51);
   --bg-card-header: rgba(35, 35, 35, 1);
   --bg-card-body: rgba(45, 45, 45, 0.9); 
-  --bg-card: rgba(45, 45, 45,0.9); 
+  --bg-card: rgba(45, 45, 45, 1); 
   --card-divider: rgba(30, 30, 30, 1);
   --text-color: #f0f0f0;
   --table-bg: rgba(30, 30, 30, 1);
@@ -109,6 +109,7 @@ button:focus-visible {
 }
 
 .card {
+  z-index: 1;
   /* padding: 2em; */
   background-color: var(--bg-card) !important;
   color: var(--text-color) !important;
@@ -152,6 +153,7 @@ button:focus-visible {
   transition: background-color 0.3s ease, color 0.3s ease;
   border: 1px solid var(--card-divider);
   overflow: hidden;
+
 }
 
 .card-header {
@@ -217,7 +219,7 @@ button:focus-visible {
   left: 0;
   width: 100%;
   pointer-events: none;
-  z-index: 0;
+  /* z-index: 0; */
 }
 
 /* Individual cog style */
