@@ -1,78 +1,73 @@
 /* ===== LIGHT THEME ===== */
 :root[data-theme="light"] {
   --bg-body: linear-gradient(-45deg, #76a1ac, #3f5877, #73d8ef, #435a7b);
-  --bg-card-header: rgba(255, 255, 255, 1);
-  --bg-card-body: rgba(255, 255, 255, 1);
-  --bg-card-body: rgba(255, 255, 255, 1); 
+  --bg-card-header: #ffffff;
+  --bg-card-body: #ffffff;
+  --bg-card: #ffffff;
   --card-divider: #ccc;
   --text-color: #000000;
-  --table-bg: rgba(255, 255, 255, 1);
+  --table-bg: #ffffff;
   --table-text: #000000;
   --table-border: #dee2e6;
   --btn-bg: #1a1a1a;
   --btn-text: #ffffff;
   --btn-border: #646cff;
   --btn-hover-border: #535bf2;
-    --list-bg: rgba(255, 255, 255, 0.85);
-  --list-text: #000;
-  --list-border: #ddd;
+  --list-bg: rgba(255, 255, 255, 0.85);
+  --list-text: #000000;
+  --list-border: #dddddd;
+  --btn-close-color: #000000;
 }
 
 /* ===== DARK THEME ===== */
 :root[data-theme="dark"] {
   --bg-body: linear-gradient(-45deg, #1c1e26, #252a33, #1f2631, #2c3b51);
-  --bg-card-header: rgba(35, 35, 35, 1);
-  --bg-card-body: rgba(45, 45, 45, 0.9); 
-  --bg-card: rgba(45, 45, 45, 1); 
-  --card-divider: rgba(30, 30, 30, 1);
+  --bg-card-header: #232323;
+  --bg-card-body: #2d2d2d;
+  --bg-card: #2d2d2d;
+  --card-divider: #1e1e1e;
   --text-color: #f0f0f0;
-  --table-bg: rgba(30, 30, 30, 1);
+  --table-bg: #1e1e1e;
   --table-text: #f9f9f9;
-  --table-border: #444;
+  --table-border: #444444;
   --btn-bg: #333333;
   --btn-text: #f9f9f9;
-  --btn-border: #888;
-  --btn-hover-border: #aaa;
-  --list-bg: rgba(30, 30, 30, 1);
+  --btn-border: #888888;
+  --btn-hover-border: #aaaaaa;
+  --list-bg: #1e1e1e;
   --list-text: #f0f0f0;
-  --list-border: #444;
+  --list-border: #444444;
+  --btn-close-color: #ffffff;
+   --table-bg: #2d2d2d;         /* same as --bg-card / --btn-bg */
+  --table-text: #f9f9f9;
+  --table-border: #444;
+  --table-bg: rgba(30, 30, 30, 1);
+  --table-text: #f0f0f0;
+  --table-border: rgba(255, 255, 255, 0.1);
 }
 
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-
-  /* 🌈 Gradient Background */
-  background: linear-gradient(-45deg, #546265, #3f5877, #252f71, #435a7b);
+  background: var(--bg-body);
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   color: var(--text-color);
-  
 }
 
 @keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  25% {
-    background-position: 50% 75%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  75% {
-    background-position: 50% 25%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 75%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 25%; }
+  100% { background-position: 0% 50%; }
 }
 
 a {
   font-weight: 500;
   color: #646cff;
-  text-decoration: inherit;
+  text-decoration: none;
 }
 a:hover {
   color: #535bf2;
@@ -88,190 +83,90 @@ th {
   padding: 0.4rem 0.5rem;
 }
 
-button {
+button,
+.btn {
   border-radius: 8px;
-  border: 1px solid var(--btn-border);
   padding: 0.6em 1.2em;
-  color: var(--btn-text);
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: var(--btn-bg);
-  cursor: pointer;
+  background-color: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  border: 1px solid var(--btn-border) !important;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: var(--btn-hover-border);
+
+button:hover,
+.btn:hover {
+  border-color: var(--btn-hover-border) !important;
 }
+
 button:focus,
-button:focus-visible {
+.btn:focus {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.btn-close {
+  color: var(--btn-close-color) !important;
+  background: transparent;
+  border: none;
+  opacity: 1;
+  filter: invert(0); /* default for light theme */
+}
+
+/* Apply white close button only in dark mode */
+:root[data-theme="dark"] .btn-close {
+  filter: invert(1);
+}
+
+/* Card styling */
 .card {
-  z-index: 1;
-  /* padding: 2em; */
   background-color: var(--bg-card) !important;
   color: var(--text-color) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--card-divider);
+  overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.table,
-.table tbody,
-.table thead,
-.table tfoot,
-.table-striped > tbody > tr:nth-of-type(odd),
-.table-hover > tbody > tr:hover {
-  background-color: var(--table-bg) !important;
-  color: var(--table-text) !important;
+.card-header {
+  background-color: var(--bg-card-header) !important;
+  border-bottom: 1px solid var(--card-divider) !important;
 }
 
-/* Table headers and cells */
+.card-body {
+  background-color: var(--bg-card-body) !important;
+}
+
+/* Modal fix */
+.modal-header {
+  background-color: var(--bg-card-header) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--card-divider);
+}
+
+.modal-content {
+  background-color: var(--bg-card) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--card-divider);
+}
+/* ========== Table Styling ========== */
+.table {
+  background-color: var(--table-bg) !important;
+  color: var(--table-text) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 .table th,
 .table td {
   background-color: var(--table-bg) !important;
   color: var(--table-text) !important;
   border-color: var(--table-border) !important;
-  border-width: 1px;
   border-style: solid;
-}
-
-.table tbody tr {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Optional: lighter hover for contrast */
-.table-hover tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-.card {
-  color: var(--text-color) !important;
-  background-color: var(--bg-card) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  border: 1px solid var(--card-divider);
-  overflow: hidden;
-
-}
-
-.card-header {
-  background-color: var(--bg-card-header) !important;
-  border-bottom: 1px solid var(--card-divider) !important;
-}
-
-.card-body {
-  background-color: var(--bg-card-body) !important;
-}.card {
-  color: var(--text-color) !important;
-  background-color: var(--bg-card) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  border: 1px solid var(--card-divider);
-  overflow: hidden;
-}
-
-.card-header {
-  background-color: var(--bg-card-header) !important;
-  border-bottom: 1px solid var(--card-divider) !important;
-}
-
-.card-body {
-  background-color: var(--bg-card-body) !important;
-}
-.modal-header {
-    background-color: var(--bg-card) !important;
-  color: var(--text-color) !important;
-}
-.modal-content {
-  background-color: var(--bg-card) !important;
-  color: var(--text-color) !important;
-}
-
-.btn {
-  background-color: var(--btn-bg) !important;
-  color: var(--btn-text) !important;
-  border-color: var(--btn-border) !important;
-}
-
-.btn:hover {
-  border-color: var(--btn-hover-border) !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-/* Container is optional if you want to scope the icons */
-.floating-cogs {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  pointer-events: none;
-  /* z-index: 0; */
-}
-
-/* Individual cog style */
-.floating-cogs .cog {
-  position: absolute;
-  bottom: -40px;
-  font-size: 2rem;
-  color: rgba(255, 255, 255, 0.2);
-  animation: floatCog 15s ease-out infinite;
-}
-
-/* Animation keyframes */
-@keyframes floatCog {
-  0% {
-    transform: translateY(0) scale(2) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    transform: translateY(-30vh) scale(4) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-/* Variants to stagger positions and timing */
-.floating-cogs .cog:nth-child(1) {
-  left: 15%;
-  animation-delay: 0s;
-}
-.floating-cogs .cog:nth-child(2) {
-  left: 35%;
-  animation-delay: 2s;
-}
-.floating-cogs .cog:nth-child(3) {
-  left: 55%;
-  animation-delay: 5s;
-}
-.floating-cogs .cog:nth-child(4) {
-  left: 75%;
-  animation-delay: 5s;
-}
-
-
-
-.table {
-  border-radius: 14px !important;
-  overflow: hidden; /* Ensures borders don't leak past rounding */
+  border-width: 1px;
 }
 
 .table thead:first-child tr:first-child th:first-child {
@@ -290,7 +185,21 @@ button:focus-visible {
   border-bottom-right-radius: 14px !important;
 }
 
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.03) !important; /* very subtle dark striping */
+}
 
+.table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important; /* dark theme hover effect */
+}
+
+/* Less harsh row dividers for dark theme */
+.table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+
+/* List groups */
 .list-group {
   background-color: var(--list-bg);
   color: var(--list-text);
@@ -301,12 +210,51 @@ button:focus-visible {
   color: var(--list-text) !important;
   border-bottom: 1px solid var(--list-border) !important;
 }
-
 .list-group-item:last-child {
   border-bottom: none !important;
 }
 
+/* Badges */
 .badge.bg-primary {
   background-color: var(--btn-border) !important;
   color: var(--btn-text) !important;
 }
+
+/* Floating Cogs Animation */
+.floating-cogs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.floating-cogs .cog {
+  position: absolute;
+  bottom: -40px;
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.2);
+  animation: floatCog 15s ease-out infinite;
+}
+
+@keyframes floatCog {
+  0% {
+    transform: translateY(0) scale(2) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-30vh) scale(4) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.floating-cogs .cog:nth-child(1) { left: 15%; animation-delay: 0s; }
+.floating-cogs .cog:nth-child(2) { left: 35%; animation-delay: 2s; }
+.floating-cogs .cog:nth-child(3) { left: 55%; animation-delay: 5s; }
+.floating-cogs .cog:nth-child(4) { left: 75%; animation-delay: 5s; }

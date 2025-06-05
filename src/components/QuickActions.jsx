@@ -222,8 +222,8 @@ const QuickActions = () => {
           <h5 className="mb-0">Quick Actions</h5>
         </Card.Header>
         <Card.Body>
-          <Row className="g-2">
-            <Col xs={6} md={3}>
+          <Row className="g-4">
+            <Col xs={12} md={3}>
               <Button
                 className="w-100"
                 onClick={() => setShowLocationModal(true)}
@@ -232,7 +232,7 @@ const QuickActions = () => {
                 Add Location
               </Button>
             </Col>
-            <Col xs={6} md={3}>
+            <Col xs={12} md={3}>
               <Button
                 className="w-100"
                 onClick={() => setShowContainerModal(true)}
@@ -241,7 +241,7 @@ const QuickActions = () => {
                 Add Container
               </Button>
             </Col>
-            <Col xs={6} md={3}>
+            <Col xs={12} md={3}>
               <Button
                 className="w-100"
                 onClick={() => setShowCategoryModal(true)}
@@ -250,7 +250,7 @@ const QuickActions = () => {
                 Add Category
               </Button>
             </Col>
-            <Col xs={6} md={3}>
+            <Col xs={12} md={3}>
               <Button className="w-100" onClick={() => setShowItemModal(true)}>
                 <i className="bi bi-plus-square-fill me-1"></i>
                 Add Item
