@@ -40,7 +40,9 @@ const MenuNavbar = () => {
                 <i className="bi bi-layout-text-window-reverse"></i>{" "}
                 {t("menu.inventory")}
               </Nav.Link>
-     
+              <Nav.Link as={Link} to="/quick-actions">
+              <i class="bi bi-lightning"></i>{"Quick Actions"}
+              </Nav.Link>
             </>
           )}
         </Nav>

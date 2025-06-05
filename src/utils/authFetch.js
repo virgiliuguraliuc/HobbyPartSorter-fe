@@ -19,7 +19,7 @@ export const authFetch = async (url, options = {}) => {
     if (response.status === 403) {
       localStorage.removeItem("token");
       window.location.href = "/login";
-      return new Promise(() => {});
+      throw new Error("Unauthorized");
     }
 
     return response;

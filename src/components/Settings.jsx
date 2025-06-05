@@ -8,8 +8,10 @@ import {
   CardBody,
   Row,
   Col,
+  InputGroup,
 } from "react-bootstrap";
 import { useTheme } from "../contexts/ThemeContext";
+import { authFetch } from "../utils/authFetch";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -21,6 +23,17 @@ const Settings = () => {
     notifications: true,
     apiBaseUrl: "",
     aiBaseUrl: "",
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+    passwordChanged: false,
+    passwordError: null,
+  });
+
+  const [showPassword, setShowPassword] = useState({
+    old: false,
+    new: false,
+    confirm: false,
   });
 
   const [saved, setSaved] = useState(false);
@@ -47,6 +60,8 @@ const Settings = () => {
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
+      passwordChanged: false,
+      passwordError: null,
     });
     setSaved(false);
     setServerSaved(false);
@@ -57,7 +72,6 @@ const Settings = () => {
     if (formData.theme !== theme) {
       setTheme(formData.theme);
     }
-    console.log("Settings saved:", formData);
     setSaved(true);
   };
 
@@ -80,8 +94,56 @@ const Settings = () => {
       aiBaseUrl: import.meta.env.VITE_AI_BASE_URL,
     }));
     setServerSaved(true);
-    // window.location.reload(); // optionally refresh to reinit config
   };
+
+  const toggleShow = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await authFetch(
+        `${formData.apiBaseUrl}/change-password`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            old_password: formData.oldPassword,
+            new_password: formData.newPassword,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        setFormData((prev) => ({
+          ...prev,
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+          passwordChanged: true,
+          passwordError: null,
+        }));
+      } else {
+        const error = await response.json();
+        setFormData((prev) => ({
+          ...prev,
+          passwordError: error.detail || "Failed to change password",
+        }));
+      }
+    } catch (err) {
+      setFormData((prev) => ({
+        ...prev,
+        passwordError: "Network error",
+      }));
+    }
+  };
+
+  const isPasswordValid =
+    formData.newPassword.length >= 10 &&
+    formData.newPassword === formData.confirmPassword;
 
   return (
     <div className="mt-4">
@@ -205,6 +267,102 @@ const Settings = () => {
               Reset to Defaults
             </Button>
           </div>
+        </Card.Body>
+      </Card>
+
+      <Card className="mt-4">
+        <Card.Header>
+          <h5>Change Password</h5>
+        </Card.Header>
+        <Card.Body>
+          <Form onSubmit={handleChangePassword}>
+            <Form.Group className="mb-3">
+              <Form.Label>Old Password</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type={showPassword.old ? "text" : "password"}
+                  name="oldPassword"
+                  placeholder="old password"
+                  value={formData.oldPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => toggleShow("old")}
+                >
+                  <i
+                    className={`bi ${
+                      showPassword.old ? "bi-eye-slash" : "bi-eye"
+                    }`}
+                  />
+                </Button>
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type={showPassword.new ? "text" : "password"}
+                  placeholder="at least 10 characters"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => toggleShow("new")}
+                >
+                  <i
+                    className={`bi ${
+                      showPassword.new ? "bi-eye-slash" : "bi-eye"
+                    }`}
+                  />
+                </Button>
+              </InputGroup>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Confirm New Password</Form.Label>
+              <InputGroup>
+                <Form.Control
+                  type={showPassword.confirm ? "text" : "password"}
+                        placeholder="at least 10 characters"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => toggleShow("confirm")}
+                >
+                  <i
+                    className={`bi ${
+                      showPassword.confirm ? "bi-eye-slash" : "bi-eye"
+                    }`}
+                  />
+                </Button>
+              </InputGroup>
+            </Form.Group>
+
+            {formData.passwordChanged && (
+              <Alert variant="success">Password changed successfully.</Alert>
+            )}
+            {formData.passwordError && (
+              <Alert variant="danger">{formData.passwordError}</Alert>
+            )}
+
+            <Button
+              variant="warning"
+              type="submit"
+              disabled={!isPasswordValid}
+            >
+              Change Password
+            </Button>
+          </Form>
         </Card.Body>
       </Card>
     </div>
