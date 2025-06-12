@@ -41,7 +41,7 @@ const MenuNavbar = () => {
                 {t("menu.inventory")}
               </Nav.Link>
               <Nav.Link as={Link} to="/quick-actions">
-              <i class="bi bi-lightning"></i>{"Quick Actions"}
+              <i className="bi bi-lightning"></i>{"Quick Actions"}
               </Nav.Link>
             </>
           )}

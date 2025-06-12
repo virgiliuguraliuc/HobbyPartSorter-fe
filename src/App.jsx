@@ -26,7 +26,7 @@ const App = () => {
     return (
         <LanguageProvider>
               <ThemeProvider>
-            <Router>
+            <Router basename='/hpt'>
                 <MenuNavbar />
                 <div className="container">
                     <Routes>

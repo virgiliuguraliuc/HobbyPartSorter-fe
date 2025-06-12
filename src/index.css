@@ -108,14 +108,18 @@ button:focus,
 
 .btn-close {
   color: var(--btn-close-color) !important;
-  background: transparent;
-  border: none;
-  opacity: 1;
+  /* background: transparent; */
+  /* border: none; */
+  /* opacity: 1; */
   filter: invert(0); /* default for light theme */
 }
 
 /* Apply white close button only in dark mode */
 :root[data-theme="dark"] .btn-close {
+   color: var(--btn-text) !important;
+  /* background: var(--btn-bg) !important;  */
+  border-color: transparent !important;
+  background-color: transparent !important;
   filter: invert(1);
 }
 

@@ -3,8 +3,13 @@ import { Card, Button, Modal, Form, Row, Col } from "react-bootstrap";
 import WebcamCapture from "./WebcamCapture";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import ChatAgent from "./ChatAgent";
 
 const QuickActions = () => {
+  //agentul de ai
+  const { token } = authFetch();
+  <ChatAgent token={token} />
+
   //locations
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationData, setLocationData] = useState({
@@ -259,6 +264,10 @@ const QuickActions = () => {
           </Row>
         </Card.Body>
       </Card>
+   <div className="col">
+      <ChatAgent token={token} />
+    </div>
+
       <Modal
         show={showLocationModal}
         onHide={() => setShowLocationModal(false)}
