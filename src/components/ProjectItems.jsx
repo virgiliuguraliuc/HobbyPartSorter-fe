@@ -147,9 +147,9 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
             <Table bordered size="sm">
               <thead>
                 <tr>
-                  <th>Item Name</th>
-                  <th>Quantity Used</th>
-                  <th>Actions</th>
+                  <th className="ps-2">Item Name</th>
+                  <th className="ps-2">Quantity Used</th>
+                  <th className="ps-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -159,7 +159,7 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
                   );
                   return (
                     <tr key={item.ProjectItemID}>
-                      <td>{matchedItem?.ItemName || "Unknown"}</td>
+                      <td className="ps-2">{matchedItem?.ItemName || "Unknown"}</td>
                           <td className="text-end" style={{ width: "1%", whiteSpace: "wrap" }}>{item.QuantityUsed}</td>
                       <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                         <div className="d-flex justify-content-end gap-2">
@@ -221,16 +221,18 @@ const ProjectItems = ({ ProjectID, availableItems }) => {
   <Button
     size="sm"
     variant="outline-primary"
+    className="small"
     disabled={currentPage === 1}
     onClick={() => setCurrentPage((prev) => prev - 1)}
   >
     &lt; Prev
   </Button>
-  <span>
+  <span className="small">
     Page {currentPage} of {totalPages}
   </span>
   <Button
     size="sm"
+    className="small"
     variant="outline-primary"
     disabled={currentPage === totalPages}
     onClick={() => setCurrentPage((prev) => prev + 1)}

@@ -138,17 +138,17 @@ const Categories = () => {
             <Table bordered size="sm" responsive>
               <thead className="thead-dark">
                 <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Actions</th>
+                  {/* <th className="ps-2">ID</th> */}
+                  <th className="ps-2">Name</th>
+                  <th className="ps-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedCategories.map((cat) => (
-                  <tr key={cat.CategoryID}>
-                    <td>{cat.CategoryID}</td>
-                    <td>{cat.CategoryName}</td>
-                    <td style={{ whiteSpace: "nowrap" }}>
+                  <tr className="ps-2" key={cat.CategoryID}>
+                    {/* <td className="ps-2">{cat.CategoryID}</td> */}
+                    <td className="ps-2">{cat.CategoryName}</td>
+                    <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                       <div className="d-flex justify-content-end gap-2">
                         <OverlayTrigger
                           placement="top"
@@ -206,17 +206,19 @@ const Categories = () => {
 
               <Button
                 size="sm"
+                className="small"
                 variant="outline-primary"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
                 &lt; Prev
               </Button>
-              <span>
+              <span className="small">
                 Page {currentPage} of {totalPages}
               </span>
               <Button
                 size="sm"
+                className="small"
                 variant="outline-primary"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}

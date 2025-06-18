@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/hpt/', // 👈 base path for building at /hpt/
+  base: '/hpt/', // base path for building at /hpt/
   plugins: [
     react(),
     VitePWA({
@@ -22,11 +22,11 @@ export default defineConfig({
         theme_color: '#000000',
         background_color: '#ffffff',
         display: 'standalone',
-        start_url: '/hpt/',      // 👈 must match deployment path
-        scope: '/hpt/',          // 👈 ensures service worker matches scope
+        start_url: '/hpt/',
+        scope: '/hpt/',
         icons: [
           {
-            src: '/hpt/icons/icon-192.png', // 👈 must be prefixed
+            src: '/hpt/icons/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
           },
@@ -41,6 +41,12 @@ export default defineConfig({
             type: 'image/png',
             purpose: 'any maskable',
           },
+        ],
+      },
+      workbox: {
+        navigateFallbackDenylist: [
+          // Prevent SW from intercepting API calls
+          /^\/hpt\/api\/.*$/,
         ],
       },
       devOptions: {

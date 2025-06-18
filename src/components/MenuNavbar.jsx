@@ -26,33 +26,35 @@ const MenuNavbar = () => {
         {t("menu.brand")}
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
-      <Navbar.Collapse id="basic-navbar-nav">
-        <Nav className="me-auto mt-1">
+      <Navbar.Collapse id="basic-navbar-nav p-0">
+   
           {isLoggedIn && (
-            <>
-              <Nav.Link as={Link} to="/projects">
+              <Nav className="ms-auto mt-1 align-items-center">
+              <Nav.Link className="ms-auto me-1" as={Link} to="/projects">
                 <i className="bi bi-folder"></i> {t("menu.projects")}
               </Nav.Link>
-              <Nav.Link as={Link} to="/storage">
+              <Nav.Link className="ms-auto me-1" as={Link} to="/storage">
                 <i className="bi bi-geo-alt"></i> {t("menu.storage")}
               </Nav.Link>
-              <Nav.Link as={Link} to="/inventory">
+              <Nav.Link className="ms-auto me-1" as={Link} to="/inventory">
                 <i className="bi bi-layout-text-window-reverse"></i>{" "}
                 {t("menu.inventory")}
               </Nav.Link>
-              <Nav.Link as={Link} to="/quick-actions">
+              <Nav.Link className="ms-auto me-1" as={Link} to="/quick-actions">
               <i className="bi bi-lightning"></i>{"Quick Actions"}
               </Nav.Link>
-            </>
+              <div className="ms-auto me-1 med"><ItemSearch /> </div>
+               </Nav>
+          
           )}
-        </Nav>
-          {isLoggedIn && <div className="mt-1 me-2"><ItemSearch /> </div>}
+       
+          {/* {isLoggedIn && } */}
 
         <Nav>
           <Dropdown className="mt-1" align="end">
-            <Dropdown.Toggle variant="outline-light" id="settings-dropdown">
+            <Dropdown.Toggle className="login med" variant="outline-light" id="settings-dropdown">
               <i className=" bi bi-gear"></i>{" "}
-              {isLoggedIn ? username : t("menu.login")}
+            <span className=""> {isLoggedIn ? username : t("menu.login")}</span>  
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
@@ -68,9 +70,9 @@ const MenuNavbar = () => {
                   </Dropdown.Item>
                 </>
               ) : (
-                <Dropdown.Item as={Link} to="/login">
+                <Dropdown.Item className="small" as={Link} to="/login">
                   <i className="bi bi-box-arrow-in-right me-2"></i>
-                  {t("menu.login")}
+                  <span className="small">{t("menu.login")} </span>
                 </Dropdown.Item>
               )}
               <Dropdown.Divider />

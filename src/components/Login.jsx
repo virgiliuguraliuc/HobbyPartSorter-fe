@@ -116,9 +116,8 @@ const Login = () => {
                 <Button
                   variant="danger"
                   className="w-100 mb-2"
-                  onClick={() =>
-                    (window.location.href = `${getApiBaseUrl()}/login/google`)
-                  }
+                onClick={() => window.open(`${getApiBaseUrl()}/login/google`, "_self")}
+
                 >
                   <i className="bi bi-google me-2"></i> Sign in with Google
                 </Button>

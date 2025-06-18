@@ -1,27 +1,28 @@
 import React, { useRef, useState } from "react";
 import { Button } from "react-bootstrap";
+
 const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [facingMode, setFacingMode] = useState("environment"); // rear camera by default
 
   const startCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: { facingMode: { ideal: facingMode } },
       });
       setStream(mediaStream);
       setCameraActive(true);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       } else {
-        // try again in the next frame if camera not ready
         setTimeout(() => {
           if (videoRef.current) videoRef.current.srcObject = mediaStream;
         }, 50);
       }
-        if (onStartCamera) onStartCamera();
+      if (onStartCamera) onStartCamera();
     } catch (err) {
       console.error("Camera access denied or unavailable:", err);
     }
@@ -38,12 +39,7 @@ const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
   const handleCapture = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (
-      !video ||
-      !canvas ||
-      video.videoWidth === 0 ||
-      video.videoHeight === 0
-    ) {
+    if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) {
       console.error("Video not ready for capture.");
       return;
     }
@@ -63,9 +59,16 @@ const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
     }, "image/jpeg");
   };
 
+  const toggleFacingMode = () => {
+    const newMode = facingMode === "environment" ? "user" : "environment";
+    setFacingMode(newMode);
+    stopCamera();
+    setTimeout(startCamera, 200); // slight delay before restarting
+  };
+
   return (
     <div className="mt-2">
-     {!cameraActive && (
+      {!cameraActive && (
         <Button
           variant="outline-secondary"
           onClick={startCamera}
@@ -83,13 +86,9 @@ const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
             autoPlay
             playsInline
             style={{ width: "100%", borderRadius: "5px", marginTop: "10px" }}
-            onCanPlay={() => {
-              // Video is ready to capture
-              console.log("Video stream is ready");
-            }}
           />
           <canvas ref={canvasRef} style={{ display: "none" }} />
-          <div className="d-flex gap-2 mt-2">
+          <div className="d-flex flex-wrap gap-2 mt-2">
             <Button variant="primary" onClick={handleCapture}>
               <i className="bi bi-check-circle me-1" />
               Capture
@@ -97,13 +96,15 @@ const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
             <Button variant="outline-danger" onClick={stopCamera}>
               Cancel
             </Button>
+            <Button variant="outline-secondary" onClick={toggleFacingMode}>
+              <i className="bi bi-arrow-repeat me-1" />
+              Switch Camera
+            </Button>
           </div>
         </div>
       )}
     </div>
   );
-
-  
 };
 
 export default WebcamCapture;

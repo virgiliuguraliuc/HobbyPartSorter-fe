@@ -157,18 +157,18 @@ const ItemLocations = () => {
             <Table bordered>
               <thead>
                 <tr>
-                  <th>Item</th>
-                  <th>Container</th>
-                  <th>Image</th>
-                  <th>Actions</th>
+                  <th className="ps-2">Item</th>
+                  <th className="ps-2">Container</th>
+                  <th className="ps-2">Image</th>
+                  <th className="ps-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedLocations.map((loc) => (
                   <tr key={loc.ItemLocationID}>
-                    <td>{getItemName(loc.ItemID)}</td>
-                    <td>{getContainerName(loc.ContainerID)}</td>
-                    <td>
+                    <td className="ps-2">{getItemName(loc.ItemID)}</td>
+                    <td className="ps-2">{getContainerName(loc.ContainerID)}</td>
+                    <td className="ps-2">
                       {getContainerImage(loc.ContainerID) ? (
                         <img
                           src={`data:image/jpeg;base64,${getContainerImage(loc.ContainerID)}`}
@@ -231,17 +231,17 @@ const ItemLocations = () => {
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => prev - 1)}
-                  className="me-2"
+                  className="me-2 small"
                 >
                   &lt; Prev
                 </Button>
-                <span>Page {currentPage} of {totalPages}</span>
+                <span className="small">Page {currentPage} of {totalPages}</span>
                 <Button
                   variant="outline-primary"
                   size="sm"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((prev) => prev + 1)}
-                  className="ms-2"
+                  className="ms-2 small"
                 >
                   Next &gt;
                 </Button>

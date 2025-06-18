@@ -137,19 +137,19 @@ const Locations = () => {
             <Table bordered size="sm" responsive>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Address</th>
-                  <th>Actions</th>
+                  <th className="ps-2">Name</th>
+                  <th className="ps-2">Type</th>
+                  <th className="ps-2">Address</th>
+                  <th className="ps-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedLocations.map((location) => (
                   <tr key={location.LocationID}>
-                    <td>{location.LocationName}</td>
-                    <td>{location.LocationType || "N/A"}</td>
-                    <td>{location.Address || "N/A"}</td>
-                    <td className="text-end">
+                    <td className="ps-2">{location.LocationName}</td>
+                    <td className="ps-2">{location.LocationType || "N/A"}</td>
+                    <td className="ps-2">{location.Address || "N/A"}</td>
+                    <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                       <div className="d-flex justify-content-end gap-2">
                         <OverlayTrigger
                           placement="top"
@@ -192,6 +192,7 @@ const Locations = () => {
             <div className="d-flex justify-content-end align-items-center mt-2 gap-2">
               <Form.Select
                 size="sm"
+                // className="small"
                 style={{ width: "auto" }}
                 value={itemsPerPage}
                 onChange={(e) => {
@@ -208,16 +209,18 @@ const Locations = () => {
               <Button
                 size="sm"
                 variant="outline-primary"
+                className="small"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
                 &lt; Prev
-              </Button>
-              <span>
+              </Button >
+              <span className="small">
                 Page {currentPage} of {totalPages}
               </span>
               <Button
                 size="sm"
+                className="small"
                 variant="outline-primary"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}

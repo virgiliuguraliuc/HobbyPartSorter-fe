@@ -3,7 +3,7 @@ export const getApiBaseUrl = () =>
   // localStorage.getItem("api_base_url") || import.meta.env.VITE_API_BASE_URL;
 {
   const url = localStorage.getItem("api_base_url");
-  return url || "/hpt/api";
+    return url || `${window.location.origin}/hpt/api`;
 }
 
 export const getAiBaseUrl = () =>

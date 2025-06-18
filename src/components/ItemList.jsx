@@ -398,9 +398,9 @@ const ItemsList = () => {
               <Table bordered responsive>
                 <thead>
                   <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>
+                    <th className="ps-2">Image</th>
+                    <th className="ps-2">Name</th>
+                    <th className="ps-2">
                       Details
                       <Button
                         size="sm"
@@ -411,7 +411,7 @@ const ItemsList = () => {
                         <i className="bi bi-eye"></i>
                       </Button>
                     </th>
-                    <th>Container</th>
+                    <th className="ps-2">Container</th>
                     <th className="d-none d-md-table-cell">
                       <span className="d-none d-sm-inline">Weight</span> (kg)
                       <Button
@@ -452,7 +452,7 @@ const ItemsList = () => {
                       </Button>
                     </th>
 
-                    <th>
+                    <th className="ps-2">
                       <span className="d-none d-sm-inline"></span> (Cat.)
                       <Button
                         variant="light"
@@ -492,7 +492,7 @@ const ItemsList = () => {
                       </Button>
                     </th>
 
-                    <th>Actions</th>
+                    <th className="ps-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -503,7 +503,7 @@ const ItemsList = () => {
                       )?.CategoryName || "Unknown";
                     return (
                       <tr key={item.itemID}>
-                        <td>
+                        <td className="ps-2">
                           <div className="text-end">
                             {item.Image && (
                               <img
@@ -518,11 +518,11 @@ const ItemsList = () => {
                             )}
                           </div>
                         </td>
-                        <td>
+                        <td className="ps-2">
                           {" "}
                           <div className="text-end">{item.ItemName} </div>
                         </td>
-                        <td>
+                        <td className="ps-2">
                           <div
                             className=" text-end "
                             style={{ whiteSpace: "wrap" }}
@@ -534,7 +534,7 @@ const ItemsList = () => {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td className="ps-2">
                           <div className="text-end">
                             {item.ContainerImage ? (
                               <img
@@ -560,7 +560,7 @@ const ItemsList = () => {
                         <td className="d-none d-md-table-cell">
                           <div className="text-end">{item.Price} $</div>
                         </td>
-                        <td>
+                        <td className="ps-2">
                           <div className="text-end">{categoryName}</div>
                         </td>
                         <td className="d-none d-md-table-cell">
@@ -636,15 +636,15 @@ const ItemsList = () => {
 
               <div className="d-flex align-items-center">
                 <Button
-                  variant="outline-primary"
+                  variant="outline-primary class"
                   size="sm"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => prev - 1)}
-                  className="me-2"
+                  className="me-2 small"
                 >
                   &lt; Prev
                 </Button>
-                <span>
+                <span className="small">
                   Page {currentPage} of {totalPages}
                 </span>
                 <Button
@@ -652,7 +652,7 @@ const ItemsList = () => {
                   size="sm"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((prev) => prev + 1)}
-                  className="ms-2"
+                  className="ms-2 small"
                 >
                   Next &gt;
                 </Button>

@@ -107,13 +107,12 @@ const Notes = ({ projectID = null }) => {
   }, [projectID]);
 
   const [currentPage, setCurrentPage] = useState(1);
-const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
-const indexOfLast = currentPage * itemsPerPage;
-const indexOfFirst = indexOfLast - itemsPerPage;
-const paginated = notes.slice(indexOfFirst, indexOfLast);
-const totalPages = Math.ceil(notes.length / itemsPerPage);
-
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const paginated = notes.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(notes.length / itemsPerPage);
 
   return (
     <div className="mt-4">
@@ -152,11 +151,11 @@ const totalPages = Math.ceil(notes.length / itemsPerPage);
           <Card.Body>
             <Table bordered size="sm" responsive>
               <thead>
-                <tr>
-                  <th>Note</th>
-                  {!projectID && <th>Project</th>}
-                  <th>Status</th>
-                  <th>Actions</th>
+                <tr >
+                  <th className="ps-2">Note</th>
+                  {!projectID && <th className="ps-2">Project</th>}
+                  <th className="ps-2">Status</th>
+                  <th className="ps-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,9 +165,9 @@ const totalPages = Math.ceil(notes.length / itemsPerPage);
                   );
                   return (
                     <tr key={note.TaskID}>
-                      <td>{note.Note}</td>
+                      <td className="ps-2">{note.Note}</td>
                       {!projectID && (
-                        <td>{project?.ProjectName || "Unknown"}</td>
+                        <td className="ps-2">{project?.ProjectName || "Unknown"}</td>
                       )}
                       <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                         {note.Complete ? (
@@ -218,41 +217,42 @@ const totalPages = Math.ceil(notes.length / itemsPerPage);
               </tbody>
             </Table>
             <div className="d-flex justify-content-end align-items-center mt-2 gap-2">
-  <Form.Select
-    size="sm"
-    style={{ width: "auto" }}
-    value={itemsPerPage}
-    onChange={(e) => {
-      setItemsPerPage(parseInt(e.target.value));
-      setCurrentPage(1);
-    }}
-  >
-    <option value={5}>5 per page</option>
-    <option value={10}>10 per page</option>
-    <option value={25}>25 per page</option>
-    <option value={50}>50 per page</option>
-  </Form.Select>
-  <Button
-    size="sm"
-    variant="outline-primary"
-    disabled={currentPage === 1}
-    onClick={() => setCurrentPage((prev) => prev - 1)}
-  >
-    &lt; Prev
-  </Button>
-  <span>
-    Page {currentPage} of {totalPages}
-  </span>
-  <Button
-    size="sm"
-    variant="outline-primary"
-    disabled={currentPage === totalPages}
-    onClick={() => setCurrentPage((prev) => prev + 1)}
-  >
-    Next &gt;
-  </Button>
-</div>
-
+              <Form.Select
+                size="sm"
+                style={{ width: "auto" }}
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(parseInt(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5 per page</option>
+                <option value={10}>10 per page</option>
+                <option value={25}>25 per page</option>
+                <option value={50}>50 per page</option>
+              </Form.Select>
+              <Button
+                size="sm"
+                className="small"
+                variant="outline-primary"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                &lt; Prev
+              </Button>
+              <span className="small">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                size="sm"
+                className="small"
+                variant="outline-primary"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next &gt;
+              </Button>
+            </div>
           </Card.Body>
         )}
       </Card>

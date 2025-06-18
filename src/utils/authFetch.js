@@ -18,7 +18,7 @@ export const authFetch = async (url, options = {}) => {
 
     if (response.status === 403) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      window.location.href = `${import.meta.env.BASE_URL}login`;
       throw new Error("Unauthorized");
     }
 
@@ -27,7 +27,8 @@ export const authFetch = async (url, options = {}) => {
     console.error("authFetch network error:", error);
 
     // Optionally redirect or show error UI
-    window.location.href = "/offline"; // or show a toast/modal
+    window.location.href = `${import.meta.env.BASE_URL}offline`; //foloseste pathul de base din router
+ // or show a toast/modal
     return new Promise(() => {});
   }
 };

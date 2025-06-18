@@ -45,6 +45,9 @@
   --table-text: #f0f0f0;
   --table-border: rgba(255, 255, 255, 0.1);
 }
+span {
+
+}
 
 body {
   margin: 0;
@@ -123,6 +126,16 @@ button:focus,
   filter: invert(1);
 }
 
+.small {
+  font-size: 0.7rem;
+}
+.btn-sm {
+  padding: 0.5rem;
+}
+.med {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
 /* Card styling */
 .card {
   background-color: var(--bg-card) !important;
