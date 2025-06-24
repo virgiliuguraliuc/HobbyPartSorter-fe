@@ -207,7 +207,7 @@ const Settings = () => {
         </Card.Body>
       </Card>
 
-      <Card className="mt-2">
+      {/* <Card className="mt-2">
         <Card.Header>
           <h5>Server Configuration</h5>
         </Card.Header>
@@ -268,7 +268,7 @@ const Settings = () => {
             </Button>
           </div>
         </Card.Body>
-      </Card>
+      </Card> */}
 
       <Card className="mt-4">
         <Card.Header>

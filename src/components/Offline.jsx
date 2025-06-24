@@ -31,7 +31,7 @@ const Offline = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div className="d-flex justify-content-center align-items-center vh-100">
       <Card className="p-4 shadow-sm" style={{ minWidth: "320px" }}>
         <Card.Body>
           <h4 className="mb-3 text-danger">

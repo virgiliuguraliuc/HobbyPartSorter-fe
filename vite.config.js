@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  base: '/hpt/', // base path for building at /hpt/
+  base: '/hpt/', 
   plugins: [
     react(),
     VitePWA({

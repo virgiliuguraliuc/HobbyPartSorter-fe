@@ -138,7 +138,7 @@ const Locations = () => {
               <thead>
                 <tr>
                   <th className="ps-2">Name</th>
-                  <th className="ps-2">Type</th>
+            
                   <th className="ps-2">Address</th>
                   <th className="ps-2">Actions</th>
                 </tr>
@@ -147,7 +147,7 @@ const Locations = () => {
                 {paginatedLocations.map((location) => (
                   <tr key={location.LocationID}>
                     <td className="ps-2">{location.LocationName}</td>
-                    <td className="ps-2">{location.LocationType || "N/A"}</td>
+            
                     <td className="ps-2">{location.Address || "N/A"}</td>
                     <td style={{ width: "1%", whiteSpace: "nowrap" }}>
                       <div className="d-flex justify-content-end gap-2">
@@ -251,7 +251,7 @@ const Locations = () => {
                 }
               />
             </Form.Group>
-            <Form.Group>
+            {/* <Form.Group>
               <Form.Label>Location Type</Form.Label>
               <Form.Control
                 type="text"
@@ -260,7 +260,7 @@ const Locations = () => {
                   setModalData({ ...modalData, LocationType: e.target.value })
                 }
               />
-            </Form.Group>
+            </Form.Group> */}
             <Form.Group>
               <Form.Label>Address</Form.Label>
               <Form.Control

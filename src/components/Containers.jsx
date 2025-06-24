@@ -166,25 +166,6 @@ const Containers = () => {
   const paginated = containers.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(containers.length / itemsPerPage);
 
-  //not really what i want
-  //   const handleTakePhoto = async () => {
-  //   try {
-  //     const input = document.createElement("input");
-  //     input.type = "file";
-  //     input.accept = "image/*";
-  //     input.capture = "environment"; // try to use back camera on phones
-  //     input.onchange = (e) => {
-  //       const file = e.target.files[0];
-  //       if (file) {
-  //         setModalData((prev) => ({ ...prev, imageFile: file }));
-  //       }
-  //     };
-  //     input.click();
-  //   } catch (err) {
-  //     console.error("Error capturing photo:", err);
-  //   }
-  // };
-
   const [previewUrl, setPreviewUrl] = useState(null);
 
   return (

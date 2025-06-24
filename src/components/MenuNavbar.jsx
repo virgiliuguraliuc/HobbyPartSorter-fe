@@ -45,13 +45,10 @@ const MenuNavbar = () => {
               </Nav.Link>
               <div className="ms-auto me-1 med"><ItemSearch /> </div>
                </Nav>
-          
           )}
-       
           {/* {isLoggedIn && } */}
-
         <Nav>
-          <Dropdown className="mt-1" align="end">
+          <Dropdown className="ms-auto mt-1 align-items-center" align="end">
             <Dropdown.Toggle className="login med" variant="outline-light" id="settings-dropdown">
               <i className=" bi bi-gear"></i>{" "}
             <span className=""> {isLoggedIn ? username : t("menu.login")}</span>  

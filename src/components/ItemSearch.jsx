@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Alert, Form, InputGroup } from "react-bootstrap";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import ExportItemsExcel from "./ExportItemsExcel";
 
 const ItemSearch = () => {
   const [query, setQuery] = useState("");
@@ -68,6 +69,7 @@ const ItemSearch = () => {
       <InputGroup className="me-3" style={{ maxWidth: "250px" }}>
         <Form.Control
           type="text"
+          className="text-end"
           placeholder=" Search item..."
           value={query}
           onChange={(e) => handleSearch(e.target.value)}

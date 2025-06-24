@@ -25,6 +25,7 @@ const Projects = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [collapsed, setCollapsed] = useState({});
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -232,21 +233,41 @@ const Projects = () => {
                         <i className="fas fa-trash"></i>
                       </Button>
                     </OverlayTrigger>
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() =>
+                        setCollapsed((prev) => ({
+                          ...prev,
+                          [project.ProjectID]: !prev[project.ProjectID],
+                        }))
+                      }
+                    >
+                      <i
+                        className={`bi ${
+                          collapsed[project.ProjectID] ? "bi-chevron-down" : "bi-chevron-up"
+                        }`}
+                      ></i>
+                    </Button>
                   </div>
                 </div>
               </div>
             </Card.Header>
-            <Card.Body>
-              {project.ProjectID && (
-                <ProjectItems
-                  ProjectID={project.ProjectID}
-                  availableItems={availableItems}
-                />
-              )}
-              <div className="mt-3">
-                <Notes key={project.ProjectID} projectID={project.ProjectID} />
-              </div>
-            </Card.Body>
+            {!collapsed[project.ProjectID] && (
+              <Card.Body>
+                {project.ProjectID && (
+                  <ProjectItems
+                    ProjectID={project.ProjectID}
+                    availableItems={availableItems}
+                  />
+                )}
+                <div className="mt-3">
+                  <Notes
+                    key={project.ProjectID}
+                    projectID={project.ProjectID}
+                  />
+                </div>
+              </Card.Body>
+            )}
           </Card>
         ))
       )}
@@ -305,7 +326,7 @@ const Projects = () => {
               />
             </Form.Group>
           </Form>
-             <WebcamCapture
+          <WebcamCapture
             inline
             onStartCamera={() => {
               setPreviewUrl(null);

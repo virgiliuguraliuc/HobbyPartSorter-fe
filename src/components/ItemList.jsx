@@ -12,6 +12,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
 import WebcamCapture from "./WebcamCapture";
+import ExportItemsExcel from "./ExportItemsExcel";
 
 const ItemsList = () => {
   const [items, setItems] = useState([]);
@@ -303,11 +304,14 @@ const ItemsList = () => {
       ? containers.find((c) => c.ContainerID === matchedLocation.ContainerID)
       : null;
 
+    const category = categories.find((cat) => cat.CategoryID === item.CategoryID);
+
     return {
       ...item,
       ContainerID: matchedLocation?.ContainerID || null,
       ContainerName: container?.ContainerName || null,
       ContainerImage: container?.Image || null,
+      CategoryName: category?.CategoryName || ""
     };
   });
   const getContainerById = (id) => containers.find((c) => c.ContainerID === id);
@@ -359,6 +363,7 @@ const ItemsList = () => {
         <Card.Header className="d-flex justify-content-between align-items-center">
           <h5>Items</h5>
           <div className="d-flex gap-2">
+              <ExportItemsExcel items={enrichedItems} />
             <Button
               variant="primary"
               onClick={() => {
@@ -378,6 +383,9 @@ const ItemsList = () => {
             >
               Add Item
             </Button>
+
+          
+         
             <Button
               variant="outline-secondary"
               onClick={() => setCollapsed((prev) => !prev)}

@@ -6,7 +6,7 @@ const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
-  const [facingMode, setFacingMode] = useState("environment"); // rear camera by default
+  const [facingMode, setFacingMode] = useState("environment"); // rear camera by default mobil
 
   const startCamera = async () => {
     try {
@@ -63,7 +63,7 @@ const WebcamCapture = ({ onCapture, onStartCamera, inline }) => {
     const newMode = facingMode === "environment" ? "user" : "environment";
     setFacingMode(newMode);
     stopCamera();
-    setTimeout(startCamera, 200); // slight delay before restarting
+    setTimeout(startCamera, 200); // slight delay before restarting ne trebuie timp.
   };
 
   return (

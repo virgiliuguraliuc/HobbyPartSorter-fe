@@ -3,12 +3,13 @@ import { Card, Button, Modal, Form, Row, Col } from "react-bootstrap";
 import WebcamCapture from "./WebcamCapture";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import ImportItemsExcel from "./ImportItemsExcel";
 import ChatAgent from "./ChatAgent";
 
 const QuickActions = () => {
   //agentul de ai
   const { token } = authFetch();
-  <ChatAgent token={token} />
+  <ChatAgent token={token} />;
 
   //locations
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -26,6 +27,8 @@ const QuickActions = () => {
   });
   const [locations, setLocations] = useState([]);
   const [containerPreviewUrl, setContainerPreviewUrl] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -264,9 +267,26 @@ const QuickActions = () => {
           </Row>
         </Card.Body>
       </Card>
-   <div className="col">
-      <ChatAgent token={token} />
+      <Card className="mt-4">
+        <Card.Header>
+          <h5 className="mb-0">Imports</h5>
+        </Card.Header>
+        <Card.Body>
+            <div className="d-flex justify-content-end">
+      <Button
+        className="w-auto"
+        variant="outline-success"
+        onClick={() => setShowImportModal(true)}
+      >
+        <i className="bi bi-file-earmark-spreadsheet me-1"></i>
+        Import Items from Excel
+      </Button>
     </div>
+        </Card.Body>
+      </Card>
+      <div className="col">
+        <ChatAgent token={token} />
+      </div>
 
       <Modal
         show={showLocationModal}
@@ -624,6 +644,20 @@ const QuickActions = () => {
             Save
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Excel Import Modal */}
+      <Modal show={showImportModal} onHide={() => setShowImportModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Import Items from Excel</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <ImportItemsExcel
+            onClose={() => setShowImportModal(false)}
+            locations={locations}
+            containers={containers}
+          />
+        </Modal.Body>
       </Modal>
     </>
   );
