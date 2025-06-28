@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Card, Button } from "react-bootstrap";
 import { getAiBaseUrl } from "../utils/config";
 import { getApiBaseUrl } from "../utils/config";
 import Notes from "./Notes";
 import Summary from "./Summary";
+import { useTranslation } from "react-i18next";
+import { LanguageContext } from "./LanguageProvider";
 
 const Home = () => {
   const [collapsed, setCollapsed] = useState({
@@ -11,6 +13,8 @@ const Home = () => {
     notes: false,
     helper: false,
   });
+    const { language, changeLanguage } = useContext(LanguageContext);
+    const { t } = useTranslation();
 
   const toggleCollapse = (section) => {
     setCollapsed((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -20,7 +24,7 @@ const Home = () => {
     <div className="mt-4">
       <Card className="mb-3">
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Summary</h5>
+          <h5 className="mb-0">{t("items.home.summary.title")}</h5>
           <Button
             variant="outline-secondary"
             onClick={() => toggleCollapse("summary")}
@@ -34,7 +38,7 @@ const Home = () => {
         </Card.Header>
         {!collapsed.summary && (
           <Card.Body>
-            <p>This section provides a quick overview of your inventory, stats, and recent changes.</p>
+            <p>{t}</p>
             <Summary/>
           </Card.Body>
         )}
@@ -42,7 +46,7 @@ const Home = () => {
 
       <Card className="mb-3">
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Notes</h5>
+          <h5 className="mb-0">{t("items.home.notes.title")}</h5>
           <Button
             variant="outline-secondary"
             onClick={() => toggleCollapse("notes")}
@@ -56,7 +60,7 @@ const Home = () => {
         </Card.Header>
         {!collapsed.notes && (
           <Card.Body>
-            <p>You can write down ideas, part numbers, or upcoming tasks here.</p>
+            <p>{t("items.home.notes.description")}</p>
             <Notes/>
           </Card.Body>
         )}
@@ -64,7 +68,7 @@ const Home = () => {
 
       <Card className="mb-3">
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Hobby Helper</h5>
+          <h5 className="mb-0">{t("Hobby Helper")}</h5>
           <Button
             variant="outline-secondary"
             onClick={() => toggleCollapse("helper")}
@@ -78,7 +82,7 @@ const Home = () => {
         </Card.Header>
         {!collapsed.helper && (
           <Card.Body>
-            <p>AI suggestions, calculations, or part compatibility helpers will appear here.</p>
+            <p>{t("items.home.helper.description")}</p>
           </Card.Body>
         )}
       </Card>

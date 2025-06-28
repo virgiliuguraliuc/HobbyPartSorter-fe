@@ -11,6 +11,8 @@ import {
 import ConfirmationModal from "./ConfirmationModal";
 import { authFetch } from "../utils/authFetch";
 import { getApiBaseUrl } from "../utils/config";
+import { useTranslation } from "react-i18next";
+
 
 const Notes = ({ projectID = null }) => {
   const [notes, setNotes] = useState([]);
@@ -21,6 +23,7 @@ const Notes = ({ projectID = null }) => {
   const [selectedForDelete, setSelectedForDelete] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const { t } = useTranslation();
 
   const [modalData, setModalData] = useState({
     TaskID: null,
@@ -118,7 +121,7 @@ const Notes = ({ projectID = null }) => {
     <div className="mt-4">
       <Card>
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">Notes</h5>
+          <h5 className="mb-0">{t("items.home.notes.title")}</h5>
           <div className="d-flex gap-2">
             <Button
               onClick={() => {
@@ -238,7 +241,7 @@ const Notes = ({ projectID = null }) => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
-                &lt; Prev
+                &lt; {t("items.pagination.prev")}
               </Button>
               <span className="small">
                 Page {currentPage} of {totalPages}
@@ -250,7 +253,7 @@ const Notes = ({ projectID = null }) => {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
               >
-                Next &gt;
+                {t("items.pagination.next")} &gt;
               </Button>
             </div>
           </Card.Body>

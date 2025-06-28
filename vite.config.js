@@ -44,7 +44,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         navigateFallbackDenylist: [
+              
           // Prevent SW from intercepting API calls
           /^\/hpt\/api\/.*$/,
         ],
