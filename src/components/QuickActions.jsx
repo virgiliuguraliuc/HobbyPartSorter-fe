@@ -174,18 +174,24 @@ const QuickActions = () => {
 
   const handleSaveItem = async () => {
     const formData = new FormData();
-    Object.entries(itemData).forEach(([key, value]) => {
-      if (key === "imageFile" && value) return; // handle below
-      formData.append(key, value);
-    });
+  formData.append("itemName", itemData.ItemName);
+formData.append("categoryID", itemData.CategoryID);
+formData.append("weight", itemData.Weight);
+formData.append("price", itemData.Price);
+formData.append("quantity", itemData.Quantity || 1);
+formData.append("description", itemData.Description || "");
 
+if (itemData.imageFile) {
+  const resized = await handleImageResize(itemData.imageFile);
+  formData.append("image", resized, itemData.imageFile.name || "image.jpg");
+}
     if (itemData.imageFile) {
       const resized = await handleImageResize(itemData.imageFile);
       formData.append("image", resized, itemData.imageFile.name);
     }
 
     try {
-      await authFetch(`${getApiBaseUrl()}/api/items/AddItem`, {
+      await authFetch(`${getApiBaseUrl()}/api/ItemsBlob/AddItem`, {
         method: "POST",
         body: formData,
       });

@@ -29,7 +29,7 @@ const ItemsList = () => {
     Price: "",
     Quantity: "",
     Description: "",
-    ImageFile: null,
+    imageFile: null,
   });
   const [collapsed, setCollapsed] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
@@ -194,9 +194,9 @@ const ItemsList = () => {
       formData.append("description", modalData.Description || "");
       formData.append("quantity", modalData.Quantity || "");
 
-      if (modalData.ImageFile) {
-        const resizedImage = await handleImageResize(modalData.ImageFile);
-        formData.append("image", resizedImage, modalData.ImageFile.name);
+      if (modalData.imageFile) {
+        const resizedImage = await handleImageResize(modalData.imageFile);
+        formData.append("image", resizedImage, modalData.imageFile.name);
       }
 
       const response = await authFetch(url, {
@@ -375,7 +375,7 @@ const ItemsList = () => {
                   Price: "",
                   Quantity: "",
                   Description: "",
-                  ImageFile: null,
+                  imageFile: null,
                 });
                 setIsEditing(false);
                 setShowModal(true);
@@ -592,7 +592,7 @@ const ItemsList = () => {
                                     Price: item.Price,
                                     Description: item.Description,
                                     Quantity: item.Quantity,
-                                    ImageFile: null, // image is not preloaded, but upload still works
+                                    imageFile: null, // image is not preloaded, but upload still works
                                   });
                                   setIsEditing(true);
                                   setShowModal(true);
@@ -783,7 +783,7 @@ const ItemsList = () => {
               <Form.Control
                 type="file"
                 onChange={(e) =>
-                  setModalData({ ...modalData, ImageFile: e.target.files[0] })
+                  setModalData({ ...modalData, imageFile: e.target.files[0] })
                 }
               />
             </Form.Group>
